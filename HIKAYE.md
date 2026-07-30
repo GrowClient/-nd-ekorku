@@ -78,7 +78,7 @@ Her eşyanın taşıdığı çelişki, aynı beş gerçeğe çıkar.
 | Kavanozlar | 1999 yok | O yıl bu evde hayat durdu |
 | İki çay bardağı | Biri kırık, altın tutkalla yapıştırılmış | Kaybedileni atmamak |
 | Dikiş kalıpları | 5 yaş → 7 yaş, arada boşluk | Bir beden atlanmaz; bir çocuk atlanır |
-| Kıyafet kolisi | Küçükler yıpranmış, büyükler yeni | Hikâye tersten anlatıyor |
+| Kıyafet kolisi | Küçükler yıllarca giyilmiş, büyükler hiç giyilmemiş | Küçük beden en az yıpranan olmalıydı; iki ayrı çocuk |
 | Koridor çerçeveleri | 1998 ile 2001 arası boş | Boş değil — boşaltılmış |
 | Karyola | Tavandaki tavşan lekesi | İlk *gerçek* anı |
 | Peluş ayı "Pamuk" | Kutu 12 Ocak 1999'da bantlanmış | Sen gelmeden önce kapatıldı |

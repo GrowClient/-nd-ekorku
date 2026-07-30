@@ -55,6 +55,8 @@ const Ev = {
     }
     if (t < uzun - .001) parca.push({ a: t, b: uzun, y0, y1 });
 
+    const kagitli = mal === M.duvar1 || mal === M.duvar2 || mal === M.duvar3;
+
     for (const p of parca) {
       const l = p.b - p.a;
       if (l < .005) continue;
@@ -63,12 +65,36 @@ const Ev = {
       const en  = yatay ? l : kal;
       const boy = yatay ? kal : l;
       const h   = p.y1 - p.y0;
-      const m = new THREE.Mesh(kutuGeo(en, h, boy, (mal.userData && mal.userData.olcek) || 2), mal);
+      const kaydir = (Math.abs(Math.sin(cx * 12.9898 + cz * 78.233)) * 43758.5453) % 1;
+      const m = new THREE.Mesh(
+        kutuGeo(en, h, boy, (mal.userData && mal.userData.olcek) || 2, kaydir, kagitli), mal);
       m.scale.set(en, h, boy);
       m.position.set(cx, (p.y0 + p.y1) / 2, cz);
       m.castShadow = true; m.receiveShadow = true;
       Ev.sahne.add(m);
       carp(cx - en / 2, cx + en / 2, p.y0, p.y1, cz - boy / 2, cz + boy / 2);
+
+      /* Mimari profiller — odaların çıplak kutu görünmesini kıran şey. */
+      if (o.trim === false) continue;
+      const tabanda = Math.abs(p.y0 - y0) < .01;
+      const tepede  = Math.abs(p.y1 - y1) < .01;
+      const seritKoy = (mal2, yMerkez, yuk, tasma) => {
+        const s = new THREE.Mesh(G.kutu, mal2);
+        s.scale.set(yatay ? l - .02 : kal + tasma, yuk, yatay ? kal + tasma : l - .02);
+        s.position.set(cx, yMerkez, cz);
+        s.castShadow = true; s.receiveShadow = true;
+        Ev.sahne.add(s);
+      };
+      if (tabanda && h > .9) seritKoy(M.ahsapKoyu, p.y0 + .07, .14, .06);      // süpürgelik
+      if (tepede  && h > .9) seritKoy(M.tavan,     p.y1 - .06, .1,  .09);      // kartonpiyer
+      if (tabanda && !tepede) seritKoy(M.ahsapKoyu, p.y1 + .02, .06, .12);     // pencere denizliği
+      if (tepede && !tabanda && h < .95) {                                     // kapı/pencere lentosu
+        const pv = new THREE.Mesh(G.kutu, M.ahsapKoyu);
+        pv.scale.set(yatay ? l + .14 : kal + .08, .1, yatay ? kal + .08 : l + .14);
+        pv.position.set(cx, p.y0 - .04, cz);
+        pv.castShadow = true; pv.receiveShadow = true;
+        Ev.sahne.add(pv);
+      }
     }
   }
 
@@ -84,28 +110,33 @@ const Ev = {
   }
   function levhalar(liste, y, mal, kal) { liste.forEach(p => levha(p[0], p[1], p[2], p[3], y, mal, kal)); }
 
-  /* Merdiven: basamak + rıht çizer, rampayı kaydeder */
+  /* Merdiven: her basamak, tabandan basamak üstüne kadar dolu bir blok
+     olarak çizilir — böylece altta boşluk/dikiş kalmaz. Rampayı kaydeder. */
   function merdiven(x0, z0, x1, z1, yAlt, yUst, eksen, n, korkulukKoord) {
     const uzun = eksen === 'x' ? Math.abs(x1 - x0) : Math.abs(z1 - z0);
     const gen  = eksen === 'x' ? Math.abs(z1 - z0) : Math.abs(x1 - x0);
     const yuks = yUst - yAlt;
-    const riser = Math.abs(yuks) / n;
+    const taban = Math.min(yAlt, yUst) - .12;
+    const basamakBoy = uzun / n;
 
     for (let i = 0; i < n; i++) {
       const t = (i + .5) / n;
       const yTop = yAlt + yuks * ((i + 1) / n);
+
+      // dolu gövde (tabandan basamak üstüne)
+      const g = new THREE.Mesh(G.kutu, M.ahsap);
+      const h = yTop - taban;
+      if (eksen === 'x') { g.scale.set(basamakBoy + .01, h, gen); g.position.set(x0 + (x1 - x0) * t, taban + h / 2, (z0 + z1) / 2); }
+      else               { g.scale.set(gen, h, basamakBoy + .01); g.position.set((x0 + x1) / 2, taban + h / 2, z0 + (z1 - z0) * t); }
+      g.castShadow = true; g.receiveShadow = true;
+      Ev.sahne.add(g);
+
+      // basamak tahtası (üst yüzey, biraz taşkın)
       const m = new THREE.Mesh(G.kutu, M.ahsapKoyu);
-      if (eksen === 'x') { m.scale.set(uzun / n + .02, .1, gen); m.position.set(x0 + (x1 - x0) * t, yTop - .05, (z0 + z1) / 2); }
-      else               { m.scale.set(gen, .1, uzun / n + .02); m.position.set((x0 + x1) / 2, yTop - .05, z0 + (z1 - z0) * t); }
+      if (eksen === 'x') { m.scale.set(basamakBoy + .06, .06, gen + .02); m.position.set(x0 + (x1 - x0) * t, yTop - .03, (z0 + z1) / 2); }
+      else               { m.scale.set(gen + .02, .06, basamakBoy + .06); m.position.set((x0 + x1) / 2, yTop - .03, z0 + (z1 - z0) * t); }
       m.castShadow = true; m.receiveShadow = true;
       Ev.sahne.add(m);
-
-      const r = new THREE.Mesh(G.kutu, M.ahsap);          // rıht
-      const kenar = i / n;
-      if (eksen === 'x') { r.scale.set(.05, riser, gen); r.position.set(x0 + (x1 - x0) * kenar, yTop - .05 - riser / 2, (z0 + z1) / 2); }
-      else               { r.scale.set(gen, riser, .05); r.position.set((x0 + x1) / 2, yTop - .05 - riser / 2, z0 + (z1 - z0) * kenar); }
-      r.receiveShadow = true;
-      Ev.sahne.add(r);
     }
 
     Ev.rampalar.push({
@@ -133,6 +164,18 @@ const Ev = {
     obj.traverse(o => { if (o.isMesh) o.userData.esya = esyaId; });
     obj.userData.esya = esyaId;
     Ev.etkilesimliler.push(obj);
+    return obj;
+  }
+
+  /* Mobilyayı katı yap: dünya sınır kutusundan çarpışma üretir.
+     Alçak nesneler (halı, tepsi, kilit) engel sayılmaz.  */
+  function kati(obj, o = {}) {
+    obj.updateMatrixWorld(true);
+    const k = new THREE.Box3().setFromObject(obj);
+    if (k.max.y - k.min.y < (o.enAz ?? .34)) return obj;
+    const ic = o.ic ?? .05;
+    carp(k.min.x + ic, k.max.x - ic, k.min.y, Math.max(k.max.y, k.min.y + .5),
+         k.min.z + ic, k.max.z - ic);
     return obj;
   }
   function yerHalisi(x, z, en, boy, y) {
@@ -260,26 +303,21 @@ const Ev = {
 
     /* ---------------- İÇ DUVARLAR (zemin) ---------------- */
     duvar(5.5, 0, 5.5, 12, { mal: M.duvar1, bosluklar: [{ t0: 7.5, t1: 8.5 }] });
-    duvar(9.5, 0, 9.5, 12, { mal: M.duvar1, bosluklar: [{ t0: 8.0, t1: 9.0 }] });
+    duvar(9.5, 0, 9.5, 12, { mal: M.duvar1, bosluklar: [{ t0: 2.0, t1: 3.0 }, { t0: 8.0, t1: 9.0 }] });
     duvar(0, 5, 5.5, 5, { mal: M.siva, bosluklar: [{ t0: 1.0, t1: 2.0 }] });
     duvar(0, 1.7, 5.5, 1.7, { mal: M.siva, bosluklar: [{ t0: 3.7, t1: 4.7 }] });
     duvar(9.5, 5, 15, 5, { mal: M.duvar1, bosluklar: [{ t0: 1.5, t1: 2.5 }] });
 
-    /* ---------------- ANA MERDİVEN (zemin → üst) ---------------- */
+    /* ---------------- ANA MERDİVEN (zemin → üst) ----------------
+       Merdivene yalnızca güney ucundan (z≈6.5) girilir; doğu yanı
+       boydan boya küpeşteyle kapalıdır, böylece oyuncu basamakların
+       altına yandan girip yüksekliğe takılmaz.                         */
     merdiven(5.62, 6.5, 7.08, 1.0, KAT.zemin, KAT.ust, 'z', 18, 7.06);
-    // merdiven altını kapat (kafa hizası düşük olan bölüm)
-    carp(5.6, 7.1, 0, 2.1, 3.0, 6.6);
-    [[3.0, 3.9, 1.45], [3.9, 4.8, .95], [4.8, 5.7, .45], [5.7, 6.5, .12]].forEach(([a, b, h]) => {
-      const m = new THREE.Mesh(G.kutu, M.ahsapKoyu);
-      m.scale.set(1.46, h, b - a);
-      m.position.set(6.35, h / 2, (a + b) / 2);
-      m.castShadow = true; m.receiveShadow = true;
-      sahne.add(m);
-    });
+    carp(7.02, 7.18, 0, KAT.ust, 1.5, 6.05);
     // üst kat boşluk korkulukları
-    const k1 = P.merdivenKorkulugu(5.5, 0, true);
-    k1.rotation.y = -Math.PI / 2; k1.position.set(7.12, KAT.ust, 1.0); sahne.add(k1);
-    carp(7.04, 7.20, KAT.ust, KAT.ust + 1.0, 1.0, 6.6);
+    const k1 = P.merdivenKorkulugu(5.0, 0, true);
+    k1.rotation.y = -Math.PI / 2; k1.position.set(7.12, KAT.ust, 1.5); sahne.add(k1);
+    carp(7.04, 7.20, KAT.ust, KAT.ust + 1.0, 1.5, 6.6);
     const k1b = P.merdivenKorkulugu(1.5, 0, true);
     k1b.position.set(5.6, KAT.ust, 6.55); sahne.add(k1b);
     carp(5.5, 7.15, KAT.ust, KAT.ust + 1.0, 6.48, 6.62);
@@ -294,7 +332,7 @@ const Ev = {
 
     bolge(7.1, 0, 9.5, 12, KAT.ust);
     bolge(5.5, 6.5, 9.5, 12, KAT.ust);
-    bolge(5.5, 0, 9.5, 1.0, KAT.ust);
+    bolge(5.5, 0, 9.5, 1.5, KAT.ust);      // merdiven ağzı sahanlığa dahil
     bolge(9.5, 5, 15, 12, KAT.ust);
     bolge(9.5, 0, 15, 5, KAT.ust);
     bolge(0, 0, 5.5, 5, KAT.ust);
@@ -405,11 +443,13 @@ const Ev = {
     merdiven(3.4, .2, .6, 1.6, KAT.zemin, KAT.bodrum, 'x', 14, null);
 
     /* ---------------- KAPILAR ---------------- */
-    kapi('on', 8.2, 12, Math.PI, KAT.zemin, { acik: -1.15 });
+    kapi('on', 8.2, 12, Math.PI, KAT.zemin, { acik: -.06 });
+    carp(6.95, 8.25, KAT.zemin, KAT.zemin + 2.15, 11.82, 12.06);   // ev terk edilemez
     kapi('mutfak', 5.5, 8.5, Math.PI / 2, KAT.zemin, { acik: -.9 });
     kapi('salon', 9.5, 8.0, -Math.PI / 2, KAT.zemin, { acik: .85 });
     kapi('kiler', 1.0, 5, 0, KAT.zemin, { acik: 1.0 });
     kapi('oturma', 11.0, 5, 0, KAT.zemin, { acik: -1.0 });
+    kapi('oturmaSofa', 9.5, 3.0, -Math.PI / 2, KAT.zemin, { acik: .9 });
     kapi('bodrum', 3.7, 1.7, 0, KAT.zemin, { kilitli: true, anahtar: 'key_bodrum' });
     kapi('cocuk', 5.5, 10.0, Math.PI / 2, KAT.ust, { acik: -1.2 });
     kapi('banyo', 5.5, 1.2, Math.PI / 2, KAT.ust, { acik: -.7 });
@@ -426,11 +466,11 @@ const Ev = {
       Ev.isiklar.push(kay);
       return kay;
     }
-    Ev.dinamik.sofaAmpul    = ampulIsigi(7.5, 2.42, 8.6, 0xffc878, 6.5, 14);
-    Ev.dinamik.mutfakAmpul  = ampulIsigi(2.7, 2.42, 8.4, 0xffd39a, 4.4, 12);
-    Ev.dinamik.oturmaAmpul  = ampulIsigi(12.3, 2.42, 2.6, 0xffbb6a, 4.0, 12);
-    Ev.dinamik.koridorAmpul = ampulIsigi(8.3, KAT.ust + 2.25, 7.0, 0xffc070, 3.2, 11);
-    Ev.dinamik.salonAmpul   = ampulIsigi(12.4, 2.42, 9.3, 0xffc888, 3.6, 11);
+    Ev.dinamik.sofaAmpul    = ampulIsigi(7.5, 2.42, 8.6, 0xffb45c, 3.1, 8.0);
+    Ev.dinamik.mutfakAmpul  = ampulIsigi(3.2, 2.42, 8.8, 0xffc078, 2.0, 7.0);
+    Ev.dinamik.oturmaAmpul  = ampulIsigi(12.3, 2.42, 2.6, 0xffa54e, 1.3, 6.0);
+    Ev.dinamik.koridorAmpul = ampulIsigi(8.3, KAT.ust + 2.25, 7.0, 0xffab52, 1.1, 6.0);
+    Ev.dinamik.salonAmpul   = ampulIsigi(12.4, 2.42, 9.3, 0xffb060, 1.2, 6.0);
 
     yerlestir();
     return Ev;
@@ -443,7 +483,7 @@ const Ev = {
 
     /* ---- ANTRE / SOFA ---- */
     yerHalisi(7.5, 8.8, 2.0, 4.4, KAT.zemin);
-    etk(koy(P.ayakkabilik(), 8.9, 0, 11.0, -Math.PI / 2), 'ayakkabilik');
+    etk(kati(koy(P.ayakkabilik(), 8.9, 0, 11.0, -Math.PI / 2)), 'ayakkabilik');
 
     const saat = P.duvarSaati();
     saat.position.set(5.66, 1.95, 9.6); saat.rotation.y = Math.PI / 2;
@@ -452,44 +492,59 @@ const Ev = {
     const sehpa = P.masa(.62, .46, .72, M.ahsapKoyu);
     koy(sehpa, 6.2, 0, 10.7);
     koy(P.telefon(), 6.2, .74, 10.7);
-    etk(sehpa, 'telefon');
-    koy(P.bavul(), 8.7, 0, 9.5, .5);
+    etk(kati(sehpa), 'telefon');
+    kati(koy(P.bavul(), 8.9, 0, 9.4, .5));
 
-    /* ---- ANNEANNENİN OTURMA ODASI ---- */
+    /* ---- ANNEANNENİN OTURMA ODASI ----
+       Koltuk, sofaya açılan kapıdan doğrudan merdiveni görüyor.        */
     const berjer = P.berjer();
-    koy(berjer, 12.5, 0, 3.2, Math.PI * .84);
-    etk(berjer, 'koltuk');
+    koy(berjer, 11.6, 0, 2.5, -Math.PI / 2);
+    etk(kati(berjer), 'koltuk');
     Ev.dinamik.koltuk = berjer;
 
-    koy(P.masa(.52, .52, .6, M.ahsapKoyu), 13.5, 0, 2.4);
-    etk(koy(P.radyo(), 13.5, .62, 2.4, .4), 'radyo');
+    kati(koy(P.masa(.52, .52, .6, M.ahsapKoyu), 12.6, 0, 1.5));
+    etk(koy(P.radyo(), 12.6, .62, 1.5, .4), 'radyo');
 
-    koy(P.raf(1.2, 1.8, .3, 3), 14.55, 0, 1.3, -Math.PI / 2);
-    koy(P.gazeteYigini(), 14.45, 1.02, 1.3);
+    kati(koy(P.raf(1.2, 1.8, .3, 3), 14.55, 0, 1.6, -Math.PI / 2));
+    koy(P.gazeteYigini(), 14.45, 1.02, 1.6);
 
     const fr = P.cerceve(.42, .52, M.foto);
     fr.position.set(14.8, 1.72, 3.7); fr.rotation.y = -Math.PI / 2;
     S.add(fr); etk(fr, 'fotograf');
 
     koy(P.perde(1.3, 1.3), 14.75, 1.55, 2.0, -Math.PI / 2);
-    yerHalisi(12.7, 2.7, 2.6, 2.6, KAT.zemin);
+    yerHalisi(12.4, 2.8, 2.8, 2.8, KAT.zemin);
 
     /* ---- SALON ---- */
-    etk(koy(P.vitrin(), 14.6, 0, 7.0, -Math.PI / 2), 'vitrin');
-    etk(koy(P.dikisMakinesi(), 10.4, 0, 6.1, .3), 'dikis');
-    koy(P.masa(1.6, .95, .76), 12.4, 0, 9.3);
+    etk(kati(koy(P.vitrin(), 14.6, 0, 7.0, -Math.PI / 2)), 'vitrin');
+    etk(kati(koy(P.dikisMakinesi(), 10.4, 0, 6.1, .3)), 'dikis');
+    kati(koy(P.masa(1.6, .95, .76), 12.4, 0, 9.3));
     [[-1.0, 0, Math.PI / 2], [1.0, 0, -Math.PI / 2], [0, -.78, 0], [0, .78, Math.PI]]
-      .forEach(([dx, dz, r]) => koy(P.sandalye(), 12.4 + dx, 0, 9.3 + dz, r));
+      .forEach(([dx, dz, r]) => kati(koy(P.sandalye(), 12.4 + dx, 0, 9.3 + dz, r)));
     yerHalisi(12.4, 9.3, 3.4, 3.4, KAT.zemin);
     koy(P.perde(1.3, 1.3), 11.0, 1.55, 11.75);
     koy(P.perde(1.3, 1.3), 13.2, 1.55, 11.75);
 
-    /* ---- MUTFAK ---- */
-    koy(P.tezgah(3.0), 1.8, 0, 5.5, Math.PI);
-    koy(P.ocak(), 4.7, 0, 5.55, Math.PI);
-    koy(P.masa(1.3, .8, .76, M.ahsapKoyu), 2.6, 0, 8.6);
-    koy(P.sandalye(), 1.65, 0, 8.6, Math.PI / 2);
-    koy(P.sandalye(), 3.55, 0, 8.6, -Math.PI / 2);
+    /* ---- MUTFAK ----
+       Tezgah batı duvarında; kiler kapısının (z=5, x 1–2) önü boş.     */
+    kati(koy(P.tezgah(3.4), .52, 0, 9.0, -Math.PI / 2));
+    kati(koy(P.ocak(), .55, 0, 6.6, -Math.PI / 2));
+    // tezgah üstü fayans + asma dolap
+    (function mutfakDuvari() {
+      const f = new THREE.Mesh(kutuGeo(.06, .78, 4.4, 1.0, .3), M.karo);
+      f.scale.set(.06, .78, 4.4); f.position.set(.19, 1.28, 8.7);
+      f.receiveShadow = true; S.add(f);
+      const d = new THREE.Group();
+      kutu(d, .34, .7, 1.9, M.ahsapKoyu, 0, 0, 0);
+      kutu(d, .03, .6, .88, M.ahsap, .18, 0, -.46);
+      kutu(d, .03, .6, .88, M.ahsap, .18, 0, .46);
+      silindir(d, .018, .018, .07, M.pirinc, .21, 0, -.06);
+      silindir(d, .018, .018, .07, M.pirinc, .21, 0, .06);
+      koy(d, .36, 2.02, 9.4);
+    })();
+    kati(koy(P.masa(1.3, .8, .76, M.ahsapKoyu), 3.2, 0, 8.8));
+    kati(koy(P.sandalye(), 2.25, 0, 8.8, Math.PI / 2));
+    kati(koy(P.sandalye(), 4.15, 0, 8.8, -Math.PI / 2));
 
     const tepsi = new THREE.Group();
     kutu(tepsi, .36, .02, .26, M.pirinc, 0, .01, 0);
@@ -497,34 +552,34 @@ const Ev = {
     silindir(tepsi, .036, .046, .1, M.cam, .085, .06, 0);
     kutu(tepsi, .07, .006, .07, M.toz, -.085, .001, .09);
     kutu(tepsi, .07, .006, .07, M.toz, .085, .001, .09);
-    koy(tepsi, 2.6, .78, 8.6); etk(tepsi, 'fincanlar');
+    koy(tepsi, 3.2, .78, 8.8); etk(tepsi, 'fincanlar');
 
-    koy(P.raf(2.0, 1.9, .3, 4), 2.7, 0, 11.7, Math.PI);
+    kati(koy(P.raf(2.0, 1.9, .3, 4), 5.2, 0, 10.4, -Math.PI / 2));
     const kavGrup = new THREE.Group();
     for (let s = 0; s < 4; s++) for (let i = 0; i < 8; i++) {
       const k = P.kavanoz(.15 + (i % 3) * .03, .055);
       k.position.set(-.84 + i * .24, .06 + s * .38, 0);
       kavGrup.add(k);
     }
-    koy(kavGrup, 2.7, .04, 11.62); etk(kavGrup, 'kavanozlar');
+    koy(kavGrup, 5.12, .04, 10.4, -Math.PI / 2); etk(kavGrup, 'kavanozlar');
 
     const perv = new THREE.Group();
     kutu(perv, .12, 2.1, .22, M.ahsap, 0, 1.05, 0);
     for (let i = 0; i < 5; i++) kutu(perv, .125, .01, .012, M.siyah, 0, .8 + i * .062, .112);
     for (let i = 0; i < 3; i++) kutu(perv, .125, .01, .012, M.siyah, 0, 1.19 + i * .07, .112);
-    koy(perv, 5.4, 0, 7.44); etk(perv, 'cizelge');
+    koy(perv, 5.4, 0, 7.42); etk(perv, 'cizelge');
 
     const cek = new THREE.Group();
-    kutu(cek, .62, .17, .5, M.ahsap, 0, 0, 0);
-    kutu(cek, .5, .05, .02, M.kagit, 0, .03, .25);
-    silindir(cek, .022, .022, .09, M.pirinc, 0, 0, .28);
-    koy(cek, 1.0, .62, 5.85); etk(cek, 'cekmece');
+    kutu(cek, .17, .18, .62, M.ahsap, 0, 0, 0);
+    kutu(cek, .02, .05, .5, M.kagit, .09, .03, 0);
+    silindir(cek, .022, .022, .09, M.pirinc, .11, 0, 0);
+    koy(cek, .78, .62, 7.9); etk(cek, 'cekmece');
 
     /* ---- KİLER ---- */
-    koy(P.raf(1.6, 1.9, .34, 4), 4.7, 0, 3.4, -Math.PI / 2);
-    etk(koy(P.koli(.62, .44, .48), 1.3, 0, 2.6, .3), 'kutu_kiyafet');
-    koy(P.koli(.5, .34, .4), 2.2, 0, 2.4, -.4);
-    koy(P.koli(.42, .3, .34), 1.6, .44, 2.7, .8);
+    kati(koy(P.raf(1.6, 1.9, .34, 4), 4.9, 0, 3.6, -Math.PI / 2));
+    etk(kati(koy(P.koli(.62, .44, .48), 1.2, 0, 2.6, .3)), 'kutu_kiyafet');
+    kati(koy(P.koli(.5, .34, .4), 2.1, 0, 2.35, -.4));
+    koy(P.koli(.42, .3, .34), 1.5, .44, 2.7, .8);
 
     const not = new THREE.Mesh(G.kutu, M.kagit);
     not.scale.set(.17, .23, .006); not.position.set(4.2, 1.55, 1.79);
@@ -546,59 +601,59 @@ const Ev = {
       Ev.dinamik.cerceveler.push(c);
       etk(c, 'cerceveler');
     });
-    koy(P.masa(.7, .36, .8, M.ahsapKoyu), 8.0, KAT.ust, 11.4);
+    kati(koy(P.masa(.7, .36, .8, M.ahsapKoyu), 8.0, KAT.ust, 11.4));
 
     /* ---- ÇOCUK ODASI ---- */
-    etk(koy(P.karyola(), 1.3, KAT.ust, 10.2), 'yatak');
-    koy(P.gardirop(1.3, 2.0, .58), 4.65, KAT.ust, 6.8, -Math.PI / 2);
+    etk(kati(koy(P.karyola(), 1.3, KAT.ust, 10.2)), 'yatak');
+    kati(koy(P.gardirop(1.3, 2.0, .58), 4.65, KAT.ust, 6.8, -Math.PI / 2));
     const kutuAyi = new THREE.Group();
     kutu(kutuAyi, .44, .2, .32, M.karton, 0, .1, 0);
     kutu(kutuAyi, .46, .025, .05, M.kagit, 0, .2, 0);
     kutu(kutuAyi, .05, .025, .34, M.kagit, 0, .2, 0);
     koy(kutuAyi, 4.65, KAT.ust + 2.0, 6.8); etk(kutuAyi, 'pamuk');
 
-    koy(P.masa(.9, .56, .62, M.ahsapKoyu), 1.1, KAT.ust, 6.6);
+    kati(koy(P.masa(.9, .56, .62, M.ahsapKoyu), 1.1, KAT.ust, 6.6));
     const defter = new THREE.Mesh(G.kutu, M.kagit);
     defter.scale.set(.32, .035, .42);
     defter.position.set(1.1, KAT.ust + .65, 6.6); defter.rotation.y = .2;
     S.add(defter); etk(defter, 'resim_defteri');
-    koy(P.sandalye(), 1.1, KAT.ust, 7.4, Math.PI);
+    kati(koy(P.sandalye(), 1.1, KAT.ust, 7.4, Math.PI));
 
     const kagitParca = new THREE.Mesh(G.kutu, M.duvar3);
     kagitParca.scale.set(.38, .52, .05);
     kagitParca.position.set(.7, KAT.ust + .6, 5.24); kagitParca.rotation.z = .13;
     S.add(kagitParca); etk(kagitParca, 'duvar_kagidi');
 
-    koy(P.besik(), 4.4, KAT.ust, 10.7, .25);
+    kati(koy(P.besik(), 4.4, KAT.ust, 10.7, .25));
     yerHalisi(2.7, 8.8, 2.0, 2.0, KAT.ust);
 
     /* ---- BANYO ---- */
     levha(0, 0, 5.5, 5, KAT.ust + .006, M.karo, .01);
-    koy(P.lavabo(), 1.1, KAT.ust, .9);
+    kati(koy(P.lavabo(), 1.1, KAT.ust, .9));
     const ayn = P.aynaliDolap();
     ayn.position.set(1.1, KAT.ust + 1.5, .42);
     S.add(ayn); etk(ayn, 'ayna');
     const kuvet = new THREE.Group();
     kutu(kuvet, 1.7, .56, .8, M.toz, 0, .28, 0);
     kutu(kuvet, 1.54, .42, .64, M.siyah, 0, .38, 0);
-    koy(kuvet, 3.5, KAT.ust, 1.2);
+    kati(koy(kuvet, 3.5, KAT.ust, 1.2));
 
     /* ---- ANNEANNENİN ODASI ---- */
     const kar2 = P.karyola(); kar2.scale.set(1.28, 1, 1.05);
-    koy(kar2, 11.4, KAT.ust, 10.2);
-    koy(P.tuvaletMasasi(), 13.7, KAT.ust, 6.1, Math.PI);
+    kati(koy(kar2, 11.4, KAT.ust, 10.2));
+    kati(koy(P.tuvaletMasasi(), 13.7, KAT.ust, 6.1, Math.PI));
     const muc = new THREE.Group();
     kutu(muc, .28, .13, .19, M.ahsapKoyu, 0, .065, 0);
     kutu(muc, .22, .018, .14, M.pirinc, 0, .135, 0);
     koy(muc, 13.7, KAT.ust + .76, 6.3); etk(muc, 'mucevher');
 
-    koy(P.komodin(), 12.7, KAT.ust, 11.2);
+    kati(koy(P.komodin(), 12.7, KAT.ust, 11.2));
     const deste = new THREE.Group();
     for (let i = 0; i < 10; i++)
       kutu(deste, .23, .013, .14, M.kagit, (i % 3) * .007, .007 + i * .014, (i % 2) * .007, i * .06);
     koy(deste, 12.7, KAT.ust + .63, 11.2); etk(deste, 'mektuplar_iade');
 
-    koy(P.gardirop(1.6, 2.1, .62), 14.55, KAT.ust, 9.0, -Math.PI / 2);
+    kati(koy(P.gardirop(1.6, 2.1, .62), 14.55, KAT.ust, 9.0, -Math.PI / 2));
     const montG = new THREE.Group();
     kutu(montG, .36, .46, .15, M.kumasKirmizi, 0, 0, 0);
     kutu(montG, .13, .3, .13, M.kumasKirmizi, -.21, -.05, 0);
@@ -608,15 +663,15 @@ const Ev = {
     yerHalisi(12.3, 8.4, 3.0, 3.0, KAT.ust);
 
     /* ---- SANDIK ODASI ---- */
-    koy(P.raf(1.2, 1.7, .3, 3), 10.3, KAT.ust, 4.5, Math.PI);
-    koy(P.koli(.5, .36, .4), 10.5, KAT.ust, 1.2, .4);
-    koy(P.bavul(), 10.4, KAT.ust, 3.2, -.3);
+    kati(koy(P.raf(1.2, 1.7, .3, 3), 10.3, KAT.ust, 4.5, Math.PI));
+    kati(koy(P.koli(.5, .36, .4), 10.5, KAT.ust, 1.2, .4));
+    kati(koy(P.bavul(), 10.4, KAT.ust, 3.2, -.3));
 
     /* ---- TAVAN ARASI ---- */
     const albumG = new THREE.Group();
     kutu(albumG, .52, .32, .44, M.karton, 0, .16, 0);
     for (let i = 0; i < 3; i++) kutu(albumG, .32, .055, .36, M.ahsapKoyu, 0, .35 + i * .06, 0, i * .12);
-    koy(albumG, 4.4, KAT.catik, 6.4, .3); etk(albumG, 'album');
+    kati(koy(albumG, 4.4, KAT.catik, 6.4, .3)); etk(albumG, 'album');
 
     koy(P.gazeteYigini(), 6.4, KAT.catik, 7.4);
     const gaz = new THREE.Mesh(G.kutu, M.kagit);
@@ -629,18 +684,18 @@ const Ev = {
     kutu(evrakG, .46, .035, .36, M.metal, 0, .25, 0);
     koy(evrakG, 8.8, KAT.catik, 5.6, -.5); etk(evrakG, 'evraklar');
 
-    koy(P.bavul(), 3.0, KAT.catik, 8.6, .7);
-    koy(P.koli(.6, .5, .5), 9.8, KAT.catik, 8.2, .2);
-    koy(P.koli(.5, .4, .42), 2.4, KAT.catik, 5.2, -.3);
-    koy(P.koli(.45, .35, .38), 10.4, KAT.catik, 6.8, .9);
-    koy(P.sandalye(), 5.0, KAT.catik, 9.4, 2.2);
-    koy(P.besik(), 2.6, KAT.catik, 9.8, 1.1);
+    kati(koy(P.bavul(), 3.0, KAT.catik, 8.6, .7));
+    kati(koy(P.koli(.6, .5, .5), 9.8, KAT.catik, 8.2, .2));
+    kati(koy(P.koli(.5, .4, .42), 2.4, KAT.catik, 5.2, -.3));
+    kati(koy(P.koli(.45, .35, .38), 10.4, KAT.catik, 6.8, .9));
+    kati(koy(P.sandalye(), 5.0, KAT.catik, 9.4, 2.2));
+    kati(koy(P.besik(), 2.6, KAT.catik, 9.8, 1.1));
 
     /* ---- BODRUM ---- */
-    etk(koy(P.sandik(), 1.8, KAT.bodrum, 5.2, .2), 'sandik');
-    koy(P.raf(1.4, 1.7, .32, 3), .5, KAT.bodrum, 3.0, Math.PI / 2);
-    koy(P.koli(.5, .4, .42), 3.4, KAT.bodrum, 6.2, .5);
-    koy(P.koli(.44, .34, .36), 4.4, KAT.bodrum, 5.6, -.2);
+    etk(kati(koy(P.sandik(), 1.8, KAT.bodrum, 5.2, .2)), 'sandik');
+    kati(koy(P.raf(1.4, 1.7, .32, 3), .5, KAT.bodrum, 3.0, Math.PI / 2));
+    kati(koy(P.koli(.5, .4, .42), 3.4, KAT.bodrum, 6.2, .5));
+    kati(koy(P.koli(.44, .34, .36), 4.4, KAT.bodrum, 5.6, -.2));
 
     etk(koy(P.sarnicKapagi(), 7.2, KAT.bodrum, 4.3), 'sarnic');
   }

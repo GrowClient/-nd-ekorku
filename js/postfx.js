@@ -22,7 +22,7 @@ const Efekt = {
         gerilim: { value: 0 },
         nabiz:   { value: 0 },
         karart:  { value: 0 },
-        pozlama: { value: 1.45 },
+        pozlama: { value: 1.38 },
       },
       vertexShader: `
         varying vec2 vUv;

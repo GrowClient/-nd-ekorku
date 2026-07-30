@@ -25,7 +25,7 @@ const Oyuncu = {
     this.kamera = kamera;
 
     /* --- el feneri --- */
-    const f = new THREE.SpotLight(0xfff2d8, 0, 26, .63, .75, 1.12);
+    const f = new THREE.SpotLight(0xffeec6, 0, 24, .55, .82, 1.28);
     f.castShadow = true;
     f.shadow.mapSize.set(1024, 1024);
     f.shadow.camera.near = .3;
@@ -39,7 +39,7 @@ const Oyuncu = {
     this.fener = f;
 
     // fenerin yumuşak saçılması
-    const halka = new THREE.PointLight(0xffe4bc, .9, 10, 1.15);
+    const halka = new THREE.PointLight(0xffdca8, .9, 6.5, 1.3);
     halka.position.set(0, 0, -.35);
     kamera.add(halka);
     this.fenerHalka = halka;
@@ -136,7 +136,11 @@ const Oyuncu = {
     if (zem !== null) {
       this.yerdeY = zem;
       const fark = zem - this.poz.y;
-      this.poz.y += fark * Math.min(1, 16 * dt);
+      const enFazla = 3.2 * dt;                       // m/s sınırı: ani sıçrama olmaz
+      let adim = fark * Math.min(1, 14 * dt);
+      if (adim > enFazla) adim = enFazla;
+      else if (adim < -enFazla) adim = -enFazla;
+      this.poz.y += adim;
       if (Math.abs(fark) < .004) this.poz.y = zem;
     }
 
@@ -162,12 +166,12 @@ const Oyuncu = {
     k.rotation.set(0, 0, 0);
     k.rotateY(this.yon.yaw);
     k.rotateX(this.yon.pitch);
-    k.rotateZ(bobX * .12);
+    k.rotateZ(bobX * .045);
 
     /* --- fener --- */
-    const hedefGuc = this.fenerAcik ? (Durum.pilZayif ? 3.4 : 7.6) : 0;
+    const hedefGuc = this.fenerAcik ? (Durum.pilZayif ? 4.4 : 9.8) : 0;
     this.fener.intensity += (hedefGuc - this.fener.intensity) * Math.min(1, 6 * dt);
-    this.fenerHalka.intensity = this.fener.intensity * .30;
+    this.fenerHalka.intensity = this.fener.intensity * .085;
     this.fener.position.x = .12 + Math.sin(this.bobFaz) * .02;
     this.fener.position.y = -.12 + Math.sin(this.bobFaz * 2) * .015;
   },

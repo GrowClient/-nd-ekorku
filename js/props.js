@@ -51,21 +51,28 @@ function malzemeleriKur() {
   G.kur  = new THREE.SphereGeometry(1, 12, 10);
 }
 
-/* Ölçeğe göre UV'leri düzeltilmiş birim kutu geometrisi (önbellekli) */
+/* Ölçeğe göre UV'leri düzeltilmiş birim kutu geometrisi (önbellekli).
+   kaydir : yatay UV kaydırması — komşu duvarlarda desenin aynı yerden
+            başlamasını (dolayısıyla "kopyala-yapıştır" hissini) engeller.
+   dikeyTek: dikey yönde dokuyu tek seferde kaplar; duvar kâğıdının
+            tabandaki rutubeti ve tavandaki solması böylece yerinde durur. */
 const geoOnbellek = new Map();
-function kutuGeo(en, yuk, boy, olcek) {
+function kutuGeo(en, yuk, boy, olcek, kaydir = 0, dikeyTek = false) {
   const a = Math.round(en * 20) / 20, b = Math.round(yuk * 20) / 20, c = Math.round(boy * 20) / 20;
-  const anahtar = a + ',' + b + ',' + c + ',' + olcek;
+  const k8 = Math.round(kaydir * 8) / 8;
+  const anahtar = a + ',' + b + ',' + c + ',' + olcek + ',' + k8 + ',' + (dikeyTek ? 1 : 0);
   let g = geoOnbellek.get(anahtar);
   if (g) return g;
   g = new THREE.BoxGeometry(1, 1, 1);
   const uv = g.attributes.uv;
   const yuzler = [[c, b], [c, b], [a, c], [a, c], [a, b], [a, b]];  // +X -X +Y -Y +Z -Z
+  const dikeyYuz = [true, true, false, false, true, true];
   for (let f = 0; f < 6; f++) {
-    const du = yuzler[f][0] / olcek, dv = yuzler[f][1] / olcek;
+    const du = yuzler[f][0] / olcek;
+    const dv = (dikeyTek && dikeyYuz[f]) ? 1 : yuzler[f][1] / olcek;
     for (let i = 0; i < 4; i++) {
-      const k = f * 4 + i;
-      uv.setXY(k, uv.getX(k) * du, uv.getY(k) * dv);
+      const j = f * 4 + i;
+      uv.setXY(j, uv.getX(j) * du + k8, uv.getY(j) * dv);
     }
   }
   uv.needsUpdate = true;

@@ -184,9 +184,10 @@ const ESYALAR = {
     katalog: 'Etiketsiz karton koli. İçinde katlanmış çocuk kıyafetleri, naftalinli, iki grup hâlinde.',
     beats: [
       { t:'ani', s:'Bunları hatırlıyorum. Şu kırmızı kazak — fotoğrafta üstümde var.' },
-      { t:'gozlem', s:'Kıyafetler ikiye ayrılmış. Alttakiler daha küçük ve iyice yıpranmış: dizler incelmiş, yakalar esnemiş, dirsekler açılmış. Üsttekiler daha büyük ve neredeyse hiç giyilmemiş.' },
-      { t:'celiski', s:'Küçük olanlar yıpranmış, büyük olanlar yeni. Bir çocuğun kıyafetleri tersine eskir — büyüdükçe daha çok giyer, daha çok yırtar. Bu koli hikâyeyi tersten anlatıyor.' },
-      { t:'ses', s:'Kırmızı kazak üst grupta. Naftalin kokuyor. Bir kez bile giyilmemiş.' },
+      { t:'gozlem', s:'Koli ikiye ayrılmış. Altta küçük bedenler: dizler incelmiş, yakalar esnemiş, dirsekler açılmış, bazıları iki kez yamanmış. Üstte büyük bedenler: katları hiç bozulmamış, kokusu naftalinden başka bir şey değil.' },
+      { t:'celiski', s:'Bunun tersi olmalıydı. Bir çocuk küçük bedenden birkaç ayda çıkar; o yüzden en az yıpranan hep en küçük olanlardır. Buradaki küçükler ise yıllarca, her gün giyilmiş gibi.' },
+      { t:'celiski', s:'Ve büyükler hiç giyilmemiş. Alınmışlar, katlanmışlar, kaldırılmışlar — sanki sahibi eve hiç yerleşmemiş gibi.' },
+      { t:'ses', s:'Kırmızı kazak üst grupta. Etiketi bile duruyor. Fotoğrafta gördüğüm kazak bu olamaz; bu kazak hiç kimsenin sırtına girmemiş.' },
     ],
   },
 

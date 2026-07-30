@@ -101,55 +101,96 @@ const Doku = (() => {
     return dokuYap(c, 1, 1);
   }
 
-  /* ── Duvar kâğıdı: solmuş çiçek deseni, dikey şeritler ───────────────── */
+  /* ── Duvar kâğıdı ─────────────────────────────────────────────────────
+     512×1024. Dikeyde TEK kez kaplanır (zeminden tavana), o yüzden
+     tabandaki rutubet ve tavandaki solma dokuya gömülebiliyor; dikey
+     tekrar hiç görünmüyor. Motifler tek tek jitterlenir, bir kısmı
+     neredeyse silinir — bu da yatay tekrarı gizler.                      */
   function duvarKagidi(tonu = 0) {
-    const { c, x } = tuval(512, 512);
-    const r = rastgele(41 + tonu);
+    const B = 512, Y = 1024;                    // canvas y=0 → duvarın ÜSTÜ
+    const { c, x } = tuval(B, Y);
+    const r = rastgele(41 + tonu * 977);
     const paletler = [
-      ['#6b6250', '#7a705c', '#8a7a5f'],   // salon — kirli krem
-      ['#4f5a52', '#5b675e', '#6a766b'],   // koridor — soluk yeşil
-      ['#6d5a52', '#7b665d', '#8a746a'],   // yatak odası — solmuş gül
+      ['#5d5442', '#68604c', '#7b6d52'],   // salon — kirli krem
+      ['#434e46', '#4d5950', '#5b675c'],   // koridor — soluk yeşil
+      ['#5e4c45', '#6a574e', '#79645a'],   // yatak odası — solmuş gül
     ];
     const p = paletler[tonu % 3];
-    x.fillStyle = p[0]; x.fillRect(0, 0, 512, 512);
+    x.fillStyle = p[0]; x.fillRect(0, 0, B, Y);
 
-    // dikey şeritler
-    for (let i = 0; i < 512; i += 42) {
+    // düzensiz genişlikte dikey şeritler
+    let px = -20;
+    while (px < B) {
+      const w = 16 + r() * 12;
+      x.globalAlpha = .35 + r() * .3;
       x.fillStyle = p[1];
-      x.fillRect(i, 0, 21, 512);
+      x.fillRect(px, 0, w, Y);
+      px += w + 20 + r() * 16;
     }
-    // çiçek/damla motifi
-    for (let gy = 0; gy < 512; gy += 64) {
-      for (let gx = 0; gx < 512; gx += 64) {
-        const ox = gx + ((gy / 64) % 2 ? 32 : 0);
+    x.globalAlpha = 1;
+
+    // motif ızgarası — her motif kendi açısı, boyu ve solukluğuyla
+    const adim = 58;
+    for (let gy = -adim; gy < Y + adim; gy += adim) {
+      for (let gx = -adim; gx < B + adim; gx += adim) {
+        const ox = gx + ((Math.round(gy / adim)) % 2 ? adim / 2 : 0);
+        const solma = r();
+        if (solma < .12) continue;                        // bazıları hiç yok
         x.save();
-        x.translate(ox + 16, gy + 32);
-        x.globalAlpha = 0.5;
+        x.translate(ox + (r() - .5) * 5, gy + (r() - .5) * 5);
+        x.rotate((r() - .5) * .5);
+        const s = .78 + r() * .5;
+        x.scale(s, s);
+        x.globalAlpha = .16 + solma * .34;
         x.fillStyle = p[2];
         for (let yap = 0; yap < 5; yap++) {
           x.rotate(Math.PI * 2 / 5);
           x.beginPath();
-          x.ellipse(0, -9, 4.4, 9, 0, 0, 7);
+          x.ellipse(0, -8, 3.6 + r(), 8 + r() * 2, 0, 0, 7);
           x.fill();
         }
-        x.globalAlpha = 0.7;
-        x.beginPath(); x.arc(0, 0, 3, 0, 7); x.fill();
+        x.globalAlpha = .3 + solma * .35;
+        x.beginPath(); x.arc(0, 0, 2.4, 0, 7); x.fill();
         x.restore();
       }
     }
-    // rutubet ve sararma
-    lekeler(x, 512, 512, 16, '52,38,20', 30, 140, 0.3, 5);
-    lekeler(x, 512, 512, 8, '20,18,14', 40, 120, 0.22, 9);
-    // soyulma çizgileri
-    x.globalAlpha = 0.25;
-    for (let i = 0; i < 6; i++) {
-      x.strokeStyle = '#2b2318'; x.lineWidth = 1 + r() * 2;
-      x.beginPath(); x.moveTo(r() * 512, 0);
-      x.bezierCurveTo(r() * 512, 170, r() * 512, 340, r() * 512, 512);
+
+    // güneşten solma: üst kısım açılmış
+    let g = x.createLinearGradient(0, 0, 0, Y);
+    g.addColorStop(0, 'rgba(214,200,168,0.20)');
+    g.addColorStop(.35, 'rgba(214,200,168,0.05)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, B, Y);
+
+    // tabandan yükselen rutubet (canvas altı = duvarın dibi)
+    g = x.createLinearGradient(0, Y, 0, Y * .45);
+    g.addColorStop(0, 'rgba(28,22,12,0.62)');
+    g.addColorStop(.4, 'rgba(44,34,17,0.28)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, B, Y);
+    // rutubetin dalgalı sınırı
+    x.fillStyle = 'rgba(32,25,13,0.30)';
+    x.beginPath(); x.moveTo(0, Y);
+    for (let i = 0; i <= B; i += 16)
+      x.lineTo(i, Y - 90 - Math.sin(i * .045) * 34 - r() * 46);
+    x.lineTo(B, Y); x.closePath(); x.fill();
+
+    // büyük ölçekli renk dalgalanması — tekrarı kırar
+    lekeler(x, B, Y, 22, '48,36,18', 60, 260, 0.16, 5);
+    lekeler(x, B, Y, 10, '20,18,14', 70, 240, 0.13, 9);
+    lekeler(x, B, Y, 12, '150,138,112', 50, 190, 0.07, 61);
+
+    // soyulma / yırtık kenarlar
+    for (let i = 0; i < 5; i++) {
+      const sx = r() * B;
+      x.globalAlpha = .3;
+      x.strokeStyle = '#241d13'; x.lineWidth = .8 + r() * 1.6;
+      x.beginPath(); x.moveTo(sx, 0);
+      x.bezierCurveTo(sx + (r() - .5) * 90, Y * .3, sx + (r() - .5) * 90, Y * .7, sx + (r() - .5) * 60, Y);
       x.stroke();
     }
     x.globalAlpha = 1;
-    gren(x, 512, 512, 12, 21);
+    gren(x, B, Y, 11, 21);
     return dokuYap(c, 1, 1);
   }
 
@@ -240,29 +281,52 @@ const Doku = (() => {
     return dokuYap(c, 1, 1);
   }
 
-  /* ── Mutfak karosu ───────────────────────────────────────────────────── */
-  function karo() {
-    const { c, x } = tuval(256, 256);
-    const r = rastgele(777);
-    x.fillStyle = '#3b382f'; x.fillRect(0, 0, 256, 256);
-    for (let gy = 0; gy < 4; gy++) for (let gx = 0; gx < 4; gx++) {
-      const t = 86 + r() * 24;
-      x.fillStyle = `rgb(${t},${t - 3},${t - 13})`;
-      x.fillRect(gx * 64 + 2, gy * 64 + 2, 60, 60);
-      const g = x.createLinearGradient(gx * 64, gy * 64, gx * 64 + 64, gy * 64 + 64);
-      g.addColorStop(0, 'rgba(255,255,255,0.05)');
-      g.addColorStop(1, 'rgba(0,0,0,0.16)');
-      x.fillStyle = g; x.fillRect(gx * 64 + 2, gy * 64 + 2, 60, 60);
-      if (r() > 0.78) {
-        x.strokeStyle = 'rgba(0,0,0,0.4)'; x.lineWidth = 0.9;
-        x.beginPath();
-        x.moveTo(gx * 64 + 2 + r() * 60, gy * 64 + 2);
-        x.lineTo(gx * 64 + 2 + r() * 60, gy * 64 + 62);
+  /* ── Karo: her karo ayrı renk/leke, derz kirli, bazıları çatlak ─────── */
+  function karo(kucuk = false) {
+    const N = kucuk ? 8 : 5;                    // karo sayısı
+    const S = 512, a = S / N;
+    const { c, x } = tuval(S, S);
+    const r = rastgele(kucuk ? 313 : 777);
+    x.fillStyle = '#332f28'; x.fillRect(0, 0, S, S);        // derz
+
+    for (let gy = 0; gy < N; gy++) for (let gx = 0; gx < N; gx++) {
+      const px = gx * a, py = gy * a, d = a * .045;
+      const t = 92 + r() * 34;
+      const sicak = r() * 10;
+      x.fillStyle = `rgb(${(t + sicak) | 0},${(t + sicak * .6) | 0},${(t - 10) | 0})`;
+      x.fillRect(px + d, py + d, a - d * 2, a - d * 2);
+
+      // sırlı yüzey parlaması
+      const g = x.createLinearGradient(px, py, px + a, py + a);
+      g.addColorStop(0, 'rgba(255,255,255,0.09)');
+      g.addColorStop(.55, 'rgba(255,255,255,0.02)');
+      g.addColorStop(1, 'rgba(0,0,0,0.20)');
+      x.fillStyle = g; x.fillRect(px + d, py + d, a - d * 2, a - d * 2);
+
+      // benekli sır dokusu
+      for (let i = 0; i < 40; i++) {
+        x.fillStyle = `rgba(${r() > .5 ? '255,255,255' : '0,0,0'},${r() * .05})`;
+        x.fillRect(px + d + r() * (a - d * 2), py + d + r() * (a - d * 2), 1.6, 1.6);
+      }
+      // aşınma / kırık
+      if (r() > .72) {
+        x.strokeStyle = 'rgba(0,0,0,0.42)'; x.lineWidth = .8 + r();
+        let cx = px + d + r() * (a - d * 2), cy = py + d;
+        x.beginPath(); x.moveTo(cx, cy);
+        for (let s = 0; s < 5; s++) { cx += (r() - .5) * a * .3; cy += a * .2; x.lineTo(cx, cy); }
         x.stroke();
       }
+      if (r() > .88) {                                     // köşe kırığı
+        x.fillStyle = '#3a352c';
+        x.beginPath(); x.moveTo(px + d, py + d);
+        x.lineTo(px + d + a * .22, py + d); x.lineTo(px + d, py + d + a * .2);
+        x.closePath(); x.fill();
+      }
     }
-    lekeler(x, 256, 256, 18, '46,36,16', 10, 60, 0.34, 12);
-    gren(x, 256, 256, 11, 3);
+    // derzdeki kir
+    lekeler(x, S, S, 26, '38,28,12', 20, 90, 0.30, 12);
+    lekeler(x, S, S, 8, '18,16,12', 60, 200, 0.18, 44);
+    gren(x, S, S, 10, 3);
     return dokuYap(c, 1, 1);
   }
 

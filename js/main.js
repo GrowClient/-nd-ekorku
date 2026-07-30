@@ -23,17 +23,17 @@
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     sahne = new THREE.Scene();
-    sahne.background = new THREE.Color(0x04050a);
-    sahne.fog = new THREE.FogExp2(0x04050a, 0.045);
+    sahne.background = new THREE.Color(0x030407);
+    sahne.fog = new THREE.FogExp2(0x030407, 0.085);
 
     kamera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, .06, 90);
     kamera.rotation.order = 'YXZ';
     sahne.add(kamera);
 
     /* ışıklar */
-    sahne.add(new THREE.HemisphereLight(0x22304e, 0x15130e, .42));
-    sahne.add(new THREE.AmbientLight(0x2b2620, .30));
-    const ay = new THREE.DirectionalLight(0x9bb2d6, .70);
+    sahne.add(new THREE.HemisphereLight(0x141d33, 0x0a0908, .16));
+    sahne.add(new THREE.AmbientLight(0x1a1713, .10));
+    const ay = new THREE.DirectionalLight(0x7f96bb, .40);
     ay.position.set(-26, 22, 34);
     sahne.add(ay);
 
@@ -57,41 +57,8 @@
     });
     addEventListener('pointerdown', () => Ses.devamEt());
 
-    tozKur();
     saat = new THREE.Clock();
     dongu();
-  }
-
-  /* ── havada asılı toz ────────────────────────────────────────────── */
-  let toz = null;
-  function tozKur() {
-    const n = 420;
-    const p = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      p[i * 3]     = (Math.random() - .5) * 12;
-      p[i * 3 + 1] = (Math.random() - .5) * 4;
-      p[i * 3 + 2] = (Math.random() - .5) * 12;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(p, 3));
-    toz = new THREE.Points(g, new THREE.PointsMaterial({
-      color: 0xd8c8a4, size: .022, transparent: true, opacity: .5,
-      depthWrite: false, blending: THREE.AdditiveBlending, fog: true,
-    }));
-    toz.frustumCulled = false;
-    sahne.add(toz);
-  }
-
-  function tozGuncelle(t) {
-    if (!toz) return;
-    toz.position.set(Oyuncu.poz.x, Oyuncu.poz.y + 1.2, Oyuncu.poz.z);
-    const p = toz.geometry.attributes.position;
-    for (let i = 0; i < p.count; i += 3) {                 // seyrek güncelle
-      const j = (i + ((t * 20) | 0) % 3) % p.count;
-      p.setY(j, p.getY(j) + Math.sin(t * .6 + j) * .0016 - .0009);
-      if (p.getY(j) < -2) p.setY(j, 2);
-    }
-    p.needsUpdate = true;
   }
 
   /* ── vurgulama ──────────────────────────────────────────────────── */
@@ -254,7 +221,6 @@
 
     kapilariGuncelle(dt);
     isiklariGuncelle(t);
-    tozGuncelle(t);
 
     nabiz += ((Durum.gerilim > .55 ? (Math.sin(t * 2.1) * .5 + .5) * Durum.gerilim : 0) - nabiz) * dt * 2.4;
     karart += ((Durum.bitti ? 1 : 0) - karart) * dt * .7;
