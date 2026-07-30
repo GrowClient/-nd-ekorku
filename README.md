@@ -33,7 +33,8 @@ python3 -m http.server 8000
 | `E` | incele / kapı aç |
 | `Boşluk` | anı metnini ilerlet |
 | `F` | el feneri |
-| `Tab` | envanter defteri |
+| `Tab` | envanter defteri (bir satıra tıkla → o eşyanın tam kaydı) |
+| `M` | Türkçe seslendirmeyi aç/kapat |
 | `Esc` | imleci bırak |
 
 ---
@@ -44,15 +45,28 @@ python3 -m http.server 8000
   mekân, çalışan merdivenler, kilitli kapılar, anahtar ilerleyişi.
 - **29 kataloglanabilir eşya.** Her biri üç katmanlı: kuru bir *eksper notu*,
   senin *anın*, ve ikisi arasındaki *çelişki*.
+- **Okuma zorlamaz.** Çoğu eşya oyunu durdurmaz — ekranın altında tek satır
+  geçer. Yalnızca hikâyenin omurgasındaki 11 eşya tam ekran açar. Tam
+  metinler envanter defterinden istendiği zaman okunur.
+- **Evde bir şey var.** Belli bir noktadan sonra bakılmadığı sürece yaklaşan
+  bir varlık. Feneri üstüne tutarsan donar, sonra çekilir. Yakalarsa
+  öldürmez — ekran kararır, birkaç saniye önceki yerinde uyanırsın.
+- **Geri sayım.** Gerçeği öğrendiğin an annen yola çıkar. Sekiz dakikan var.
+- **İki şifreli kilit.** Kod verilmez; evdeki tarihlerden çıkarılır.
+- **Türkçe seslendirme.** Annenin sesli mesajları tarayıcının konuşma
+  motoruyla okunur (tr-TR). Türkçe ses yoksa sessizce yazıya düşer.
 - **Değişen anılar.** Gerçeğin bir kısmını öğrendikten sonra aynı eşyaya
   tekrar bakarsan anı değişir — "yankı" bloğu açılır. Oyunun ana mekaniği bu.
 - **Annenin sesli mesajları** — ilerledikçe tonu değişen bir karşı anlatıcı.
 - **Belirsiz doğaüstü.** Ev sessizce değişir: koridorda bir çerçeve daha
   boşalır, koltuk döner, ampuller söner, üst kattan bir ninni duyulur.
   Hiçbiri kanıtlanmaz; hepsi hafıza bozulmasıyla da açıklanabilir.
-- **İki final** ve kataloglama oranına göre değişen kapanış metni.
+- **Üç final** — ikisi seçimle, biri yetişemezsen.
 
 Kabaca **25–40 dakikalık** bir demo.
+
+Ölüm yok, oyun bitmez, hiçbir şey kaybetmezsin — ama ilk yarıdaki
+sessizlik ikinci yarıda bozuluyor.
 
 ---
 
@@ -82,7 +96,8 @@ js/
   textures.js             prosedürel dokular
   props.js                malzemeler + mobilya üreticileri
   house.js                evin geometrisi, çarpışma, kat sistemi, yerleşim
-  audio.js                WebAudio ses sentezi
+  varlik.js               evde dolaşan şey: doğuş, yaklaşma, donma, yakalama
+  audio.js                WebAudio ses sentezi + Türkçe seslendirme
   ui.js                   HUD, anı paneli, envanter defteri, final
   player.js               kontroller, çarpışma, el feneri
   postfx.js               son işlem şaderi

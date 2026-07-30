@@ -38,7 +38,9 @@
     sahne.add(ay);
 
     Ev.kur(sahne);
+    Varlik.kur(sahne);
     Oyuncu.kur(kamera, tuval);
+    Konusma.kur();
     Efekt.kur(renderer, innerWidth, innerHeight);
     Arayuz.kur();
     Arayuz.girisMetni();
@@ -122,6 +124,10 @@
     }
     if (h.esya) {
       const e = ESYALAR[h.esya];
+      if (KILITLER[h.esya] && !Durum.kilitAcildi[h.esya]) {
+        Arayuz.ipucuGoster('<b>E</b> <span class="kilit">şifreli kilit</span> — ' + e.ad);
+        return;
+      }
       const yeni = !Durum.esyaVar(h.esya);
       Arayuz.ipucuGoster('<b>E</b> ' + (yeni ? 'incele' : 'tekrar bak') + ' — ' + e.ad);
     }
@@ -153,20 +159,12 @@
     }
 
     if (!h.esya) return;
-    const e = ESYALAR[h.esya];
 
-    /* bodrum asma kilidi */
-    if (h.esya === 'bodrum_kapisi') {
-      if (Durum.anahtarVar('key_bodrum')) {
-        if (Ev.kapiAc('bodrum')) {
-          Ses.gicirti(1);
-          Arayuz.bildirim('ASMA KİLİT AÇILDI');
-        }
-      } else if (Durum.esyaVar('bodrum_kapisi')) {
-        Ses.tik();
-        Arayuz.fisilti(e.kilitMesaj);
-        return;
-      }
+    /* şifreli kilitler: kadran panelini aç */
+    if (KILITLER[h.esya] && !Durum.kilitAcildi[h.esya]) {
+      Arayuz.kilitAc(h.esya);
+      if (vurguluNesne) { vurgula(vurguluNesne, false); vurguluNesne = null; }
+      return;
     }
 
     Arayuz.esyaAc(h.esya);
@@ -209,6 +207,9 @@
     if (Durum.basladi && !Durum.bitti) {
       Oyuncu.guncelle(dt);
       Durum.odaGuncelle(Oyuncu.poz.x, Oyuncu.poz.y, Oyuncu.poz.z);
+      Durum.gerisayimGuncelle(dt);
+      Varlik.guncelle(dt, kamera);
+      Arayuz.gerisayimGuncelle();
       ipucuGuncelle();
       Arayuz.fenerDurum(Oyuncu.fenerAcik, Durum.pilZayif);
     } else if (!Durum.basladi) {
@@ -223,7 +224,8 @@
     isiklariGuncelle(t);
 
     nabiz += ((Durum.gerilim > .55 ? (Math.sin(t * 2.1) * .5 + .5) * Durum.gerilim : 0) - nabiz) * dt * 2.4;
-    karart += ((Durum.bitti ? 1 : 0) - karart) * dt * .7;
+    const hedefKarart = Durum.bitti ? 1 : Durum.karartma;
+    karart += (hedefKarart - karart) * dt * (Durum.karartma ? 7 : .9);
 
     Efekt.ciz(renderer, sahne, kamera, t, Durum.gerilim, nabiz, karart);
   }

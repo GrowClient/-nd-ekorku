@@ -271,3 +271,55 @@ const Ses = {
     setTimeout(dongu, 4000);
   },
 };
+
+/* =========================================================================
+   Türkçe seslendirme — tarayıcının kendi konuşma motoru (Web Speech API).
+   Ses dosyası gerektirmez. Türkçe ses yoksa sessizce yazıya düşer.
+   ========================================================================= */
+const Konusma = {
+  destek: false, ses: null, acik: true, hazir: false,
+
+  kur() {
+    if (!('speechSynthesis' in window)) return;
+    this.destek = true;
+    const sec = () => {
+      const hepsi = speechSynthesis.getVoices();
+      if (!hepsi.length) return;
+      this.ses = hepsi.find(v => v.lang && v.lang.toLowerCase().startsWith('tr'))
+              || hepsi.find(v => /turkish|türk/i.test(v.name))
+              || null;
+      this.hazir = true;
+    };
+    sec();
+    speechSynthesis.onvoiceschanged = sec;
+  },
+
+  /* metni konuş; tırnak ve sahne yönergelerini temizler */
+  soyle(metin, o = {}) {
+    if (!this.destek || !this.acik || !this.ses) return false;
+    const temiz = metin.replace(/[""«»]/g, '').replace(/\s+/g, ' ').trim();
+    if (!temiz) return false;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    const u = new SpeechSynthesisUtterance(temiz);
+    u.voice = this.ses;
+    u.lang = this.ses.lang || 'tr-TR';
+    u.rate = o.hiz ?? .94;
+    u.pitch = o.perde ?? .85;
+    u.volume = o.ses ?? 1;
+    // konuşurken ortam sesini kıs
+    if (Ses.ana) {
+      Ses.ana.gain.setTargetAtTime(.45, Ses.ctx.currentTime, .3);
+      u.onend = u.onerror = () => Ses.ana.gain.setTargetAtTime(.9, Ses.ctx.currentTime, .6);
+    }
+    speechSynthesis.speak(u);
+    return true;
+  },
+
+  sus() { if (this.destek) try { speechSynthesis.cancel(); } catch (e) {} },
+
+  cevir() {
+    this.acik = !this.acik;
+    if (!this.acik) this.sus();
+    return this.acik;
+  },
+};

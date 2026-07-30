@@ -509,5 +509,109 @@ const ACILIS = [
 const IPUCLARI = [
   'W A S D · yürü &nbsp;&nbsp;—&nbsp;&nbsp; FARE · bak &nbsp;&nbsp;—&nbsp;&nbsp; SHIFT · koş',
   'E · incele &nbsp;&nbsp;—&nbsp;&nbsp; BOŞLUK · anıyı ilerlet &nbsp;&nbsp;—&nbsp;&nbsp; F · el feneri',
-  'TAB · envanter defteri &nbsp;&nbsp;—&nbsp;&nbsp; ESC · imleci bırak',
+  'TAB · envanter defteri &nbsp;&nbsp;—&nbsp;&nbsp; M · seslendirme &nbsp;&nbsp;—&nbsp;&nbsp; ESC · imleci bırak',
+];
+
+/* ═════════════════════════════════════════════════════════════════════════
+   TEMPO AYARI
+   Oyuncuyu her eşyada tam ekran metne boğmamak için:
+     kisa  → oyun durmadan ekranın altında görünen tek satır
+     panel → yalnızca bu eşyalar tam ekran paneli açar
+     tut   → panelde gösterilecek beat'ler (kalanı deftere düşer)
+   Panel açmayan eşyaların tam metni envanter defterinden okunabilir.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+const TEMPO = {
+  saat:        { kisa:'Duvar saati 11:01\'de durmuş. Bozuk değil — birisi bir gün onu kurmayı bırakmış.' },
+  ayakkabilik: { kisa:'Ayakkabılıkta tek bir çocuk ayakkabısı. 26 numara. Ve üstünde hiç toz yok.' },
+  telefon:     { kisa:'Annemin numarası defterde on bir kez düzeltilmiş. Demek arayan taraf oymuş.' },
+  koltuk:      { kisa:'Koltuk kapıya değil, merdivene bakıyor. Minderin altında pirinç bir anahtar var.' },
+  radyo:       { kisa:'Radyo yıllardır sadece cızırtı veriyor — ve sesi sonuna kadar açık bırakılmış.' },
+  vitrin:      { kisa:'Altı plastik çocuk bardağı. Beşi tozlu. Biri sanki dün yıkanmış.' },
+  dikis:       { kisa:'İki kalıp: beş yaş 1998, yedi yaş 2000. Aradaki yıl yok.' },
+  fincanlar:   { kisa:'Her gün iki bardak koymuş. Kırılanı atmamış, altın tutkalla yapıştırmış.' },
+  kavanozlar:  { kisa:'Otuz dört kavanoz, yirmi altı yıl. Tek bir yıl eksik: 1999.' },
+  cekmece:     { kisa:'Uyku ilacı reçeteleri Şubat 1999\'da başlıyor: "hasta evde ses duyduğunu belirtiyor."' },
+  kutu_kiyafet:{ kisa:'Küçük bedenler yıllarca giyilmiş, büyükler hiç giyilmemiş. Tersi olmalıydı.' },
+  not_orhan:   { kisa:'Dayımın notu: "Bodrumu açma." Mürekkep hâlâ parlak — benden önce gelmiş.' },
+  bodrum_kapisi:{kisa:'Asma kilit dışarıdan takılmış. Altından soğuk geliyor, ve bir su sesi.' },
+  cerceveler:  { kisa:'Altı çerçeve: 1994, 1996, 1997, 1998, [boş], 2001. Boş değil — boşaltılmış.' },
+  yatak:       { kisa:'Tavandaki tavşan biçimli leke hâlâ orada. Bunu kimse bana anlatmadı; ben bulmuştum.' },
+  resim_defteri:{kisa:'Defterin iki yarısını iki ayrı el çizmiş. İkinci yarıda gri saçlı figür bir kez bile yok.' },
+  ayna:        { kisa:'Bardakta iki diş fırçası. Çocuğunkinin kılları hiç kullanılmamış gibi dimdik.' },
+  mucevher:    { kisa:'Yağlı kâğıtta bir tutam açık kahve çocuk saçı: 11.01.1999. Altında pirinç bir anahtar.' },
+
+  /* Tam ekran açanlar — hikâyenin omurgası */
+  fotograf:      { panel:true, tut:[0,1,2] },
+  cizelge:       { panel:true, tut:[0,1,3] },
+  pamuk:         { panel:true, tut:[0,1,2] },
+  duvar_kagidi:  { panel:true, tut:[1,2,4,5] },
+  mektuplar_iade:{ panel:true, tut:[0,1,3] },
+  mont:          { panel:true, tut:[0,1,2] },
+  album:         { panel:true, tut:[1,2,3,4] },
+  gazete:        { panel:true, tut:[0,1,3] },
+  evraklar:      { panel:true, tut:[1,2,4,5], verir:null },
+  sandik:        { panel:true, tut:[0,1,2,5] },
+  sarnic:        { panel:true, tut:[1,2,3] },
+};
+for (const id in TEMPO) Object.assign(ESYALAR[id], TEMPO[id]);
+
+/* ═══════════════════════════ ŞİFRELİ KİLİTLER ══════════════════════════ */
+
+const KILITLER = {
+  evraklar: {
+    kod: '1101',
+    baslik: 'Metal Evrak Kutusu',
+    altyazi: 'Kapakta dört haneli pirinç kadran. Rakamlar aşınmış — bu kilit çok açılmış.',
+    ipucu: 'Bu evde bir tarih her yerde tekrar ediyor: duran saatte, pervazdaki son çizgide, saç lülesinin kâğıdında.',
+    acilinca: 'Kadran yerine oturuyor. Kapak, sanki yıllardır bunu bekliyormuş gibi kolayca kalkıyor.',
+    yanlis: 'Kadran boşa dönüyor. Yanlış.',
+  },
+  bodrum_kapisi: {
+    kod: '0203',
+    baslik: 'Bodrum Asma Kilidi',
+    altyazi: 'Dört haneli çevirmeli asma kilit. Dışarıdan takılmış.',
+    ipucu: 'Anneannem bu kilidi kendi seçtiği bir tarihe kurmuş olmalı. Ona hiçbir şey ifade etmeyen ama ona her şeyi ifade eden bir güne.',
+    acilinca: 'Kilit açılıyor. Elimde ağır ve soğuk duruyor. Bu tarihi onun seçmiş olması bir şey anlatıyor ama henüz ne olduğunu bilmiyorum.',
+    yanlis: 'Klik. Açılmadı.',
+  },
+};
+
+/* ═══════════════════════ GERİ SAYIM VE ÜÇÜNCÜ SON ══════════════════════ */
+
+const GERISAYIM = {
+  sure: 480,                         // saniye — evrak kutusu açılınca başlar
+  olaylar: [
+    { kalan: 470, metin: 'Telefon titredi. Açmıyorum. Açmama gerek yok — kırk bir saniyelik nefes sesini zaten dinledim.' },
+    { kalan: 300, metin: 'Dışarıda bir araba. Farlar perdeden içeri vurdu, sonra söndü. Motor susmadı.' },
+    { kalan: 170, metin: 'Motor sustu. Bahçe kapısı. Adımlar. Bu evde yirmi beş yıldır duyulmayan bir ses: birinin gelişi.' },
+    { kalan:  75, metin: 'Anahtar. Kilit dönüyor. Annemin bu evin anahtarını hâlâ taşıdığını bilmiyordum.' },
+    { kalan:  20, metin: 'İçeride. Adımı sesleniyor. Yanlış adımla.' },
+  ],
+};
+
+FINAL.sonlar.yetisemedin = {
+  baslik: 'SON — "Yetişemedin"',
+  paragraflar: [
+    'Merdivenin başında beni buluyor. Elimde bir metal kutu, içinde iki nüfus kaydı ve tanımadığım bir çocuğun fotoğrafı var.',
+    'Kutuyu elimden alıyor. Zorla değil — uzatıyor elini, ben veriyorum. Otuz üç yıldır ona bir şey uzatıldığında almayı öğrenmişim.',
+    '"Bunlar anneannenin saçmalıkları," diyor. Sesi çok sakin. "O kadın yıllarca uydurdu bunları. Sana hep söyledim."',
+    'Ve ben, bir an için, ona inanıyorum. En kötüsü bu: inanmak hâlâ daha kolay.',
+    'Ev üç ay sonra satıldı. Bodruma hiç inmedim. Sarnıcın üstündeki taşı hiç görmedim.',
+    'Bazen 2 Mart\'ta uyanıyorum ve sebebini bilmiyorum. Sadece o gün, bütün gün, birinin beni beklediğini hissediyorum.',
+  ],
+};
+
+/* Varlık yakaladığında gösterilen satırlar */
+const YAKALANDI = [
+  'Karanlık. Bir el değil — sadece soğuk. Gözümü açtığımda bir önceki odadayım ve nefesim yetişmiyor.',
+  'Bir şey yanımdan geçti. Geçmedi de: içimden geçti. Nerede olduğumu bir an unuttum.',
+  'Kalp atışım kulağımda. Geri çekilmişim. Ne zaman, hatırlamıyorum.',
+];
+
+const VARLIK_FISILTI = [
+  'Üst kattan bir tahta gıcırdadı. Yukarıda kimse yok.',
+  'Koridorun ucunda bir şey duruyordu. Feneri çevirdiğimde yoktu.',
+  'Adımlar. Benimkilerden küçük.',
+  'Fener titredi. Pil değil bu.',
 ];

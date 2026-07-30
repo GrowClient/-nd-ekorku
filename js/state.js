@@ -17,11 +17,47 @@ const Durum = {
   oda: '',
   olaylar: {},
   sonSecim: null,
+  karartma: 0,
+  gerisayimAktif: false,
+  kalanSure: 0,
+  gerisayimOlaylari: {},
+  kilitAcildi: {},
 
   toplamEsya: Object.keys(ESYALAR).length,
 
   esyaVar(id) { return !!this.envanter[id]; },
   anahtarVar(k) { return !!this.anahtar[k]; },
+
+  /* Evrak kutusu açılınca annem yola çıkar */
+  gerisayimBaslat() {
+    if (this.gerisayimAktif) return;
+    this.gerisayimAktif = true;
+    this.kalanSure = GERISAYIM.sure;
+    Arayuz.gerisayimGoster(true);
+  },
+
+  gerisayimGuncelle(dt) {
+    if (!this.gerisayimAktif || this.bitti) return;
+    this.kalanSure -= dt;
+    for (const o of GERISAYIM.olaylar) {
+      if (this.kalanSure <= o.kalan && !this.gerisayimOlaylari[o.kalan]) {
+        this.gerisayimOlaylari[o.kalan] = true;
+        Arayuz.fisilti(o.metin);
+        Ses.korku();
+      }
+    }
+    // çıkmaz sokak olmasın: süre azalırken bodrum hâlâ kilitliyse hatırlat
+    if (this.kalanSure < 210 && !this.kilitAcildi.bodrum_kapisi && !this.gerisayimOlaylari.ipucu) {
+      this.gerisayimOlaylari.ipucu = true;
+      Arayuz.fisilti('Bodrum kilidi dört haneli. Anneannem onu benim gerçek doğum günüme kurmuş — ' +
+                     'kimsenin bilmediği güne. Gün, sonra ay.');
+    }
+    if (this.kalanSure <= 0) {
+      this.kalanSure = 0;
+      this.gerisayimAktif = false;
+      Arayuz.sonGoster('yetisemedin');
+    }
+  },
 
   esyaAl(id) {
     const e = ESYALAR[id];
@@ -124,10 +160,19 @@ const Durum = {
       setTimeout(() => { Ses.korku(); Arayuz.fisilti('El fenerinin ışığı sarardı.'); }, 800);
     }
 
-    // Sandık: annem yolda
-    if (this.bayrak.f_sandik && !O.yolda) {
+    // Gazete: evde artık yalnız değiliz
+    if (this.bayrak.f_gazete && !O.varlik) {
+      O.varlik = true;
+      setTimeout(() => Varlik.etkinlestir(), 6500);
+    }
+
+    // Evraklar: annem yola çıktı + iki tarih zihinde birleşir
+    if (this.bayrak.f_evrak && !O.yolda) {
       O.yolda = true;
-      setTimeout(() => Ses.korku(), 1200);
+      this.gerisayimBaslat();
+      setTimeout(() => Arayuz.fisilti(
+        'İki tarih. 11 Ocak ve 2 Mart. Bu evdeki her kilit, her çizgi, her zarf ' +
+        'bu iki günün etrafında dönüyor.'), 3200);
     }
   },
 

@@ -98,13 +98,31 @@ Her eşyanın taşıdığı çelişki, aynı beş gerçeğe çıkar.
 ```
 Antre / Salon / Oturma odası
         └─ berjer koltuk → KİLER ANAHTARI
-Mutfak → Kiler (bodrum kapısı: asma kilitli)
+Mutfak → Kiler (bodrum kapısı: dört haneli asma kilit)
 Üst kat: koridor, çocuk odası, banyo, anneannenin odası
         └─ mücevher kutusu → TAVAN ARASI ANAHTARI
 Sandık odası → Tavan arası
-        └─ evrak kutusu → BODRUM ASMA KİLİT ANAHTARI
+        └─ evrak kutusu: ŞİFRE 1101   (saat + pervaz + saç lülesi)
+           ⇒ açıldığı an GERİ SAYIM başlar: 8 dakika
+Kiler → bodrum kilidi: ŞİFRE 0203     (2 Mart — gerçek doğum günü)
 Bodrum → sandık → Sarnıç → FİNAL
 ```
+
+İki şifre de kasten aynı iki tarihe bağlı: **11 Ocak** (Deniz'in öldüğü gün)
+ve **2 Mart** (Umut'un gerçek doğum günü). Oyuncu kodu ancak metni okuduysa
+çözebilir — okumak artık ilerlemenin şartı.
+
+## Varlık
+
+Gazete küpürü okunduktan ~6 saniye sonra etkinleşir. Kim olduğu hiç
+söylenmez. Boyu bir çocuğunki kadardır.
+
+- Bakılmadığı sürece yaklaşır (0,95 m/s — oyuncudan yavaş, kaçılabilir).
+- Fener üstüne tutulduğunda donar; 1,5 saniye bakılırsa çekilir ve kaybolur.
+- Yakalarsa öldürmez: ekran kararır, oyuncu birkaç saniye önceki konumunda
+  uyanır. Envanter kaybolmaz.
+- Geri sayım başladığında hızlanır (1,35 m/s) ve daha sık doğar.
+- Panel açıkken (okurken, şifre girerken) tamamen durur.
 
 ## Sessiz olaylar (belirsiz doğaüstü)
 
@@ -123,6 +141,10 @@ Ev satılır, sarnıcın üstüne beton dökülür, havuz yapılır. Sessizlik s
 
 **B — "Kendi Yerine Geç"** · Boş satıra UMUT yazarsın. Ev satılmaz. Sarnıcın
 taşı açılır. Mezar taşı düzeltilir. *"Ben üçüncüsü değilim."*
+
+**C — "Yetişemedin"** · Sarnıca varamadan süre biter. Annen merdivenin
+başında yakalar, kutuyu elinden alır, sen de verirsin. Gerçeği hiç
+öğrenemezsin. *"Bazen 2 Mart'ta uyanıyorum ve sebebini bilmiyorum."*
 
 Kapanış metni kaç eşya kataloglandığına göre üç kademede değişir.
 
