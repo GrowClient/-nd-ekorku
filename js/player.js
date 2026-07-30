@@ -1,0 +1,174 @@
+/* =========================================================================
+   Oyuncu: fare bakışı, yürüme, çarpışma, kat geçişi, el feneri, adım sesi
+   ========================================================================= */
+
+const Oyuncu = {
+  poz: new THREE.Vector3(7.5, 0, 10.9),
+  yon: { yaw: 0, pitch: -.03 },
+  hiz: new THREE.Vector3(),
+  yerdeY: 0,
+  gozYuk: 1.68,
+  yaricap: .3,
+  boy: 1.72,
+  kilitli: false,
+  dondu: false,
+  fener: null,
+  fenerAcik: true,
+  bobFaz: 0,
+  adimSayaci: 0,
+  koridorHizi: 0,
+  duyarlilik: .0022,
+  tuslar: {},
+  kamera: null,
+
+  kur(kamera, tuval) {
+    this.kamera = kamera;
+
+    /* --- el feneri --- */
+    const f = new THREE.SpotLight(0xfff2d8, 0, 26, .63, .75, 1.12);
+    f.castShadow = true;
+    f.shadow.mapSize.set(1024, 1024);
+    f.shadow.camera.near = .3;
+    f.shadow.camera.far = 22;
+    f.shadow.bias = -.0016;
+    f.shadow.normalBias = .035;
+    kamera.add(f);
+    kamera.add(f.target);
+    f.target.position.set(0, -.14, -1);
+    f.position.set(.12, -.12, .1);
+    this.fener = f;
+
+    // fenerin yumuşak saçılması
+    const halka = new THREE.PointLight(0xffe4bc, .9, 10, 1.15);
+    halka.position.set(0, 0, -.35);
+    kamera.add(halka);
+    this.fenerHalka = halka;
+
+    /* --- fare --- */
+    tuval.addEventListener('click', () => {
+      if (!this.kilitli && !Arayuz.acikPanel) tuval.requestPointerLock();
+    });
+    document.addEventListener('pointerlockchange', () => {
+      this.kilitli = document.pointerLockElement === tuval;
+      Arayuz.imlecDurumu(this.kilitli);
+    });
+    document.addEventListener('mousemove', e => {
+      if (!this.kilitli) return;
+      this.yon.yaw -= e.movementX * this.duyarlilik;
+      this.yon.pitch -= e.movementY * this.duyarlilik;
+      const s = Math.PI / 2 - .02;
+      this.yon.pitch = Math.max(-s, Math.min(s, this.yon.pitch));
+    });
+
+    /* --- klavye --- */
+    addEventListener('keydown', e => {
+      this.tuslar[e.code] = true;
+      if (e.code === 'KeyF' && this.kilitli) this.fenerCevir();
+      if (e.code === 'Space' && this.kilitli) e.preventDefault();
+    });
+    addEventListener('keyup', e => { this.tuslar[e.code] = false; });
+    addEventListener('blur', () => { this.tuslar = {}; });
+
+    this.yerdeY = Ev.zeminYuksekligi(this.poz.x, this.poz.z, 0) ?? 0;
+    this.poz.y = this.yerdeY;
+  },
+
+  fenerCevir() {
+    this.fenerAcik = !this.fenerAcik;
+    Ses.tik();
+  },
+
+  /* Bir noktada (x,z) verilen ayak kotuyla çarpışma var mı? */
+  carpisiyorMu(x, z, ayakY) {
+    const r = this.yaricap;
+    const y0 = ayakY + .25, y1 = ayakY + this.boy;
+    const k = Ev.carpismalar;
+    for (let i = 0; i < k.length; i++) {
+      const b = k[i];
+      if (y1 <= b.y0 || y0 >= b.y1) continue;
+      if (x + r <= b.x0 || x - r >= b.x1) continue;
+      if (z + r <= b.z0 || z - r >= b.z1) continue;
+      return true;
+    }
+    return false;
+  },
+
+  guncelle(dt) {
+    const t = this.tuslar;
+    const hareketVar = this.kilitli && !Arayuz.acikPanel;
+
+    /* --- giriş --- */
+    let ileri = 0, yan = 0;
+    if (hareketVar) {
+      if (t.KeyW || t.ArrowUp) ileri += 1;
+      if (t.KeyS || t.ArrowDown) ileri -= 1;
+      if (t.KeyD || t.ArrowRight) yan += 1;
+      if (t.KeyA || t.ArrowLeft) yan -= 1;
+    }
+    const kos = (t.ShiftLeft || t.ShiftRight) && ileri > 0;
+    const hedefHiz = kos ? 3.05 : 1.62;
+
+    const uz = Math.hypot(ileri, yan) || 1;
+    ileri /= uz; yan /= uz;
+
+    const sy = Math.sin(this.yon.yaw), cy = Math.cos(this.yon.yaw);
+    const hx = (-sy * ileri + cy * yan) * hedefHiz;
+    const hz = (-cy * ileri - sy * yan) * hedefHiz;
+
+    const ivme = (ileri || yan) ? 11 : 15;
+    this.hiz.x += (hx - this.hiz.x) * Math.min(1, ivme * dt);
+    this.hiz.z += (hz - this.hiz.z) * Math.min(1, ivme * dt);
+    if (Math.abs(this.hiz.x) < .002) this.hiz.x = 0;
+    if (Math.abs(this.hiz.z) < .002) this.hiz.z = 0;
+
+    /* --- eksen ayrık hareket (duvar boyunca kayma) --- */
+    const ayak = this.poz.y;
+    let nx = this.poz.x + this.hiz.x * dt;
+    if (!this.carpisiyorMu(nx, this.poz.z, ayak)) this.poz.x = nx;
+    else this.hiz.x = 0;
+
+    let nz = this.poz.z + this.hiz.z * dt;
+    if (!this.carpisiyorMu(this.poz.x, nz, ayak)) this.poz.z = nz;
+    else this.hiz.z = 0;
+
+    /* --- kat / zemin --- */
+    const zem = Ev.zeminYuksekligi(this.poz.x, this.poz.z, this.poz.y);
+    if (zem !== null) {
+      this.yerdeY = zem;
+      const fark = zem - this.poz.y;
+      this.poz.y += fark * Math.min(1, 16 * dt);
+      if (Math.abs(fark) < .004) this.poz.y = zem;
+    }
+
+    /* --- baş sallanması --- */
+    const hizBuyuk = Math.hypot(this.hiz.x, this.hiz.z);
+    this.bobFaz += hizBuyuk * dt * 3.6;
+    const bobY = Math.sin(this.bobFaz * 2) * (kos ? .055 : .032) * Math.min(1, hizBuyuk);
+    const bobX = Math.cos(this.bobFaz) * (kos ? .035 : .02) * Math.min(1, hizBuyuk);
+
+    /* --- adım sesi --- */
+    if (hizBuyuk > .35) {
+      this.adimSayaci += hizBuyuk * dt;
+      const aralik = kos ? .78 : .95;
+      if (this.adimSayaci > aralik) {
+        this.adimSayaci = 0;
+        Ses.adim(this.poz.y < -1 ? 'tas' : 'ahsap');
+      }
+    }
+
+    /* --- kamera --- */
+    const k = this.kamera;
+    k.position.set(this.poz.x + bobX * .3, this.poz.y + this.gozYuk + bobY, this.poz.z);
+    k.rotation.set(0, 0, 0);
+    k.rotateY(this.yon.yaw);
+    k.rotateX(this.yon.pitch);
+    k.rotateZ(bobX * .12);
+
+    /* --- fener --- */
+    const hedefGuc = this.fenerAcik ? (Durum.pilZayif ? 3.4 : 7.6) : 0;
+    this.fener.intensity += (hedefGuc - this.fener.intensity) * Math.min(1, 6 * dt);
+    this.fenerHalka.intensity = this.fener.intensity * .30;
+    this.fener.position.x = .12 + Math.sin(this.bobFaz) * .02;
+    this.fener.position.y = -.12 + Math.sin(this.bobFaz * 2) * .015;
+  },
+};

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MİRAS — Kavaklı Sokak No. 7</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🕯️</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="sahne"></div>
+
+<!-- ───────────────────────────── HUD ───────────────────────────── -->
+<div id="hud">
+  <div id="nisan"></div>
+  <div id="ipucu"></div>
+  <div id="oda"></div>
+  <div id="sayac"></div>
+  <div id="fisilti"></div>
+  <div id="bildirim"></div>
+  <div id="fenerIkon">fener · açık</div>
+</div>
+
+<!-- ────────────────────── eşya / anı paneli ────────────────────── -->
+<div class="perde" id="esyaPerde"><div class="kart" id="esyaKart"></div></div>
+
+<!-- ───────────────────────── envanter defteri ──────────────────── -->
+<div class="perde" id="defterPerde"><div class="kart" id="defterKart"></div></div>
+
+<!-- ─────────────────────── telefon mesajı ──────────────────────── -->
+<div id="mesajKutu"><div class="kim"></div><div class="metin"></div></div>
+
+<!-- ────────────────────────── açılış ───────────────────────────── -->
+<div id="giris">
+  <h1>MİRAS</h1>
+  <div class="alt">Kavaklı Sokak No.&nbsp;7 &nbsp;·&nbsp; Mudurnu, Bolu &nbsp;·&nbsp; Temmuz 2026</div>
+  <div class="metin" id="girisMetin"></div>
+  <button class="dugme" id="basla">Kapıyı aç</button>
+  <div class="kontrol" id="kontroller"></div>
+</div>
+
+<!-- ─────────────────────────── final ───────────────────────────── -->
+<div id="son"></div>
+<div id="karart"></div>
+
+<script src="vendor/three.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/textures.js"></script>
+<script src="js/props.js"></script>
+<script src="js/house.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/player.js"></script>
+<script src="js/postfx.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
