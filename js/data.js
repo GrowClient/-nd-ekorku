@@ -615,3 +615,66 @@ const VARLIK_FISILTI = [
   'Adımlar. Benimkilerden küçük.',
   'Fener titredi. Pil değil bu.',
 ];
+
+/* ═════════════════════════════ ARA SAHNELER ═════════════════════════════
+   Kamera evin içinde gezer; her plan bir çekim. Koordinatlar ev
+   düzlemine göre (x: 0–15 batı→doğu, z: 0–12 kuzey→güney).
+   ═════════════════════════════════════════════════════════════════════════ */
+
+const SAHNELER = {
+  acilis: [
+    { baslangic: [7.9, 1.72, 10.6], bitis: [7.0, 1.80, 9.9],
+      bak: [5.70, 1.95, 9.60], sure: 6.0, fener: 6.5, seslendir: false,
+      yazi: 'Anneannem üç hafta önce öldü. Bu saat, onu bulduklarından çok daha önce durmuş.' },
+
+    { baslangic: [13.9, 1.55, 4.1], bitis: [12.7, 1.20, 3.1],
+      bak: [11.60, 0.62, 2.50], sure: 6.0, fener: 7.0,
+      yazi: 'Onu koltuğunda buldular. Üç gün sonra. Kapıyı komşu kırmış.' },
+
+    { baslangic: [8.9, 1.60, 7.6], bitis: [8.1, 1.70, 6.1],
+      bak: [6.40, 1.20, 5.20], bakBitis: [6.40, 2.60, 2.60], sure: 6.5, fener: 8.0,
+      yazi: 'Evi bana bıraktı. Sadece bana. Annem ve dayım avukatı üç kez aradı, sonuç değişmedi.' },
+
+    { baslangic: [7.5, 1.68, 11.75], bitis: [7.5, 1.68, 10.90],
+      bak: [7.5, 1.55, 8.0], sure: 5.0, fener: 9.0,
+      yazi: 'Kavaklı Sokak No. 7. Çocukluğumun evi. Elimde bir envanter defteri var ve tek işim içerideki her şeyi yazmak.' },
+  ],
+
+  /* Finaller — sarnıç odasında başlar (bodrum kotu y = −2.6) */
+  son_yaz: [
+    { baslangic: [7.2, -0.75, 6.4], bitis: [7.2, -1.55, 5.15],
+      bak: [7.20, -2.45, 4.30], sure: 5.5, fener: 8.5,
+      yazi: 'Kalemi tutuyorum. İlk harfte elim duruyor — otuz üç yıllık bir kas hafızası D yazmak istiyor.' },
+    { baslangic: [7.2, -1.55, 5.15], bitis: [7.2, -1.30, 4.95],
+      bak: [7.20, -2.45, 4.30], sure: 4.5, fener: 10.0,
+      yazi: 'U — M — U — T.' },
+    { baslangic: [7.2, -1.30, 4.95], bitis: [7.2, -0.60, 5.60],
+      bak: [7.20, -2.45, 4.30], bakBitis: [7.20, -0.50, 2.20], sure: 6.0, fener: 7.0,
+      yazi: 'Sarnıcın taşını açtırdım. İçi boştu. Zaten yıllardır boştu. Ama artık kapalı da değil.' },
+  ],
+
+  son_imzala: [
+    { baslangic: [7.2, -1.35, 5.10], bitis: [7.2, -1.10, 5.90],
+      bak: [7.20, -2.45, 4.30], sure: 5.0, fener: 8.0,
+      yazi: 'Formun altına imzamı atıyorum. D E N İ Z  A Y D I N.' },
+    { baslangic: [6.4, -1.10, 6.10], bitis: [3.6, -1.05, 5.60],
+      bak: [5.50, -1.60, 4.60], bakBitis: [1.90, -1.90, 5.20], sure: 6.5, fener: 6.5,
+      yazi: 'Kutuyu kapatıyorum. Sandığı yerine koyuyorum. Merdiveni çıkarken arkama bakmıyorum.' },
+    { baslangic: [7.5, 1.68, 9.6], bitis: [7.5, 1.68, 11.4],
+      bak: [7.50, 1.60, 12.0], sure: 5.5, fener: 5.0,
+      yazi: 'Ev üç ay sonra satıldı. Alıcı bahçeyi düzledi, sarnıcın üstüne beton döktü.' },
+  ],
+
+  son_yetisemedin: [
+    { baslangic: [6.6, 4.55, 2.6], bitis: [6.6, 4.35, 3.4],
+      bak: [7.00, 1.40, 8.40], sure: 5.5, fener: 6.0,
+      yazi: 'Merdivenin başındayım. Aşağıda ışık yok ama biri var.' },
+    { baslangic: [6.6, 4.35, 3.4], bitis: [6.5, 3.10, 5.4],
+      bak: [7.30, 0.90, 8.60], sure: 6.0, fener: 7.5,
+      yazi: 'Elimde bir metal kutu, içinde iki nüfus kaydı ve tanımadığım bir çocuğun fotoğrafı var.',
+      baslarken: () => Sinema.siluet(7.4, 0, 9.2, 1.30, Math.PI) },
+    { baslangic: [6.5, 2.30, 6.6], bitis: [6.9, 1.85, 7.9],
+      bak: [7.40, 0.95, 9.20], sure: 6.0, fener: 8.5,
+      yazi: 'Elini uzatıyor. Ben veriyorum. Otuz üç yıldır bana bir şey uzatıldığında almayı öğrenmişim — ve verilmesi gerektiğinde vermeyi.' },
+  ],
+};

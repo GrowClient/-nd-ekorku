@@ -41,6 +41,7 @@
     Varlik.kur(sahne);
     Oyuncu.kur(kamera, tuval);
     Konusma.kur();
+    Sinema.kur(sahne, kamera);
     Efekt.kur(renderer, innerWidth, innerHeight);
     Arayuz.kur();
     Arayuz.girisMetni();
@@ -201,10 +202,14 @@
   /* ── ana döngü ──────────────────────────────────────────────────── */
   function dongu() {
     requestAnimationFrame(dongu);
-    const dt = Math.min(.05, saat.getDelta());
+    const gercekDt = Math.min(.25, saat.getDelta());   // ara sahne gerçek zamanda akar
+    const dt = Math.min(.05, gercekDt);                 // fizik/oynanış sınırlı
     const t = saat.getElapsedTime();
 
-    if (Durum.basladi && !Durum.bitti) {
+    if (Durum.sinema) {
+      Sinema.guncelle(gercekDt);
+      Arayuz.ipucuGizle();
+    } else if (Durum.basladi && !Durum.bitti) {
       Oyuncu.guncelle(dt);
       Durum.odaGuncelle(Oyuncu.poz.x, Oyuncu.poz.y, Oyuncu.poz.z);
       Durum.gerisayimGuncelle(dt);
@@ -212,7 +217,7 @@
       Arayuz.gerisayimGuncelle();
       ipucuGuncelle();
       Arayuz.fenerDurum(Oyuncu.fenerAcik, Durum.pilZayif);
-    } else if (!Durum.basladi) {
+    } else if (!Durum.basladi && !Durum.sinema) {
       // giriş ekranında yavaş kamera kayması
       kamera.position.set(7.5 + Math.sin(t * .09) * .35, 1.62, 10.6);
       kamera.rotation.set(0, 0, 0);
@@ -227,7 +232,8 @@
     const hedefKarart = Durum.bitti ? 1 : Durum.karartma;
     karart += (hedefKarart - karart) * dt * (Durum.karartma ? 7 : .9);
 
-    Efekt.ciz(renderer, sahne, kamera, t, Durum.gerilim, nabiz, karart);
+    Efekt.ciz(renderer, sahne, kamera, t, Durum.gerilim, nabiz, karart,
+              Varlik.yakinlik, Varlik.ekranSag);
   }
 
   let kuruldu = false;

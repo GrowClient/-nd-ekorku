@@ -22,6 +22,7 @@ const Durum = {
   kalanSure: 0,
   gerisayimOlaylari: {},
   kilitAcildi: {},
+  sinema: false,
 
   toplamEsya: Object.keys(ESYALAR).length,
 

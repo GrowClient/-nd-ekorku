@@ -23,6 +23,8 @@ const Efekt = {
         nabiz:   { value: 0 },
         karart:  { value: 0 },
         pozlama: { value: 1.38 },
+        varlikYakin: { value: 0 },
+        varlikSag:   { value: 0 },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -31,7 +33,7 @@ const Efekt = {
       fragmentShader: `
         precision highp float;
         uniform sampler2D tDoku;
-        uniform float zaman, gerilim, nabiz, karart, pozlama;
+        uniform float zaman, gerilim, nabiz, karart, pozlama, varlikYakin, varlikSag;
         varying vec2 vUv;
 
         float rast(vec2 p){
@@ -79,6 +81,19 @@ const Efekt = {
           // vinyet
           renk *= smoothstep(0.95, 0.14, r2 * (1.7 + gerilim * 0.6));
 
+          // VARLIK: yaklaştığı yandan karanlık sızar, nabız gibi atar
+          if (varlikYakin > 0.001) {
+            float sag = smoothstep(0.26, 1.0, vUv.x);
+            float sol = smoothstep(0.26, 1.0, 1.0 - vUv.x);
+            float kenar = varlikSag > 0.5 ? sag
+                        : (varlikSag < -0.5 ? sol : max(sag, sol) * 1.15);
+            float nb = 0.55 + 0.45 * sin(zaman * (3.4 + varlikYakin * 7.0));
+            float g2 = kenar * varlikYakin * (0.45 + 0.55 * nb);
+            renk = mix(renk, renk * vec3(0.16, 0.14, 0.21), clamp(g2, 0.0, 0.92));
+            renk += vec3(0.055, 0.006, 0.010) * g2 * nb;
+            renk *= 1.0 - varlikYakin * 0.10 * nb;          // genel nefes
+          }
+
           // film greni
           float gr = rast(vUv * vec2(1280.0, 720.0) + fract(zaman * 0.97) * 137.3);
           renk += (gr - 0.5) * (0.048 + gerilim * 0.042);
@@ -107,7 +122,7 @@ const Efekt = {
     this.hedef.setSize(Math.round(en * pr), Math.round(boy * pr));
   },
 
-  ciz(renderer, sahne, kamera, t, gerilim, nabiz, karart) {
+  ciz(renderer, sahne, kamera, t, gerilim, nabiz, karart, varlikYakin, varlikSag) {
     renderer.setRenderTarget(this.hedef);
     renderer.clear();
     renderer.render(sahne, kamera);
@@ -117,6 +132,8 @@ const Efekt = {
     u.gerilim.value = gerilim;
     u.nabiz.value = nabiz;
     u.karart.value = karart;
+    u.varlikYakin.value = varlikYakin || 0;
+    u.varlikSag.value = varlikSag || 0;
     renderer.render(this.sahne, this.kamera);
   },
 };

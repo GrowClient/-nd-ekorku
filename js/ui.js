@@ -60,9 +60,11 @@ const Arayuz = {
     setTimeout(() => {
       this.el.giris.classList.add('gizli');
       Durum.basladi = true;
-      const c = document.querySelector('canvas');
-      if (c) c.requestPointerLock();
-      this.fisilti('Kapıyı arkamdan kapatıyorum. İçerisi dışarıdan soğuk.');
+      Sinema.oynat(SAHNELER.acilis, () => {
+        const c = document.querySelector('canvas');
+        if (c) c.requestPointerLock();
+        this.fisilti('Kapıyı arkamdan kapatıyorum. İçerisi dışarıdan soğuk.');
+      });
     }, 1400);
   },
 
@@ -378,11 +380,21 @@ const Arayuz = {
     Konusma.sus();
     this.acikPanel = 'son';
     this.gerisayimGoster(false);
+    this.gerisayimGoster(false);
     document.exitPointerLock && document.exitPointerLock();
+    Durum.sonSecim = id;
+    const sahne = SAHNELER['son_' + id];
+    if (sahne && !this._sonSahneOynadi) {
+      this._sonSahneOynadi = true;
+      this.el.son.classList.remove('gor');
+      this.el.son.style.opacity = '1';
+      Sinema.oynat(sahne, () => { this.el.karart.classList.add('gor');
+        setTimeout(() => this.sonGoster(id), 1400); });
+      return;
+    }
     this.el.karart.classList.add('gor');
     this.el.hud.classList.add('gizli');
     this.el.son.classList.add('gor');
-    Durum.sonSecim = id;
     const son = FINAL.sonlar[id];
     const oran = Durum.sayac / Durum.toplamEsya;
     const epilog = oran > .92 ? FINAL.epilog.tam : oran > .65 ? FINAL.epilog.cok : FINAL.epilog.az;
@@ -391,6 +403,7 @@ const Arayuz = {
     s.style.opacity = '0';
     s.style.transition = 'opacity .9s';
     setTimeout(() => {
+      s.style.opacity = '1';
       s.innerHTML = '<div class="kutu"><h2>' + son.baslik + '</h2>' +
         son.paragraflar.map(p => '<p>' + p + '</p>').join('') +
         '<div class="kapanis">' + epilog + '</div>' +

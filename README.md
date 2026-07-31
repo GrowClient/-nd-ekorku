@@ -61,6 +61,9 @@ python3 -m http.server 8000
 - **Belirsiz doğaüstü.** Ev sessizce değişir: koridorda bir çerçeve daha
   boşalır, koltuk döner, ampuller söner, üst kattan bir ninni duyulur.
   Hiçbiri kanıtlanmaz; hepsi hafıza bozulmasıyla da açıklanabilir.
+- **Ara sahneler.** Açılış ve üç finalin her biri motor içi kamera
+  yolculuğu: siyah bantlar, altyazı, evin içinde yavaş çekimler. Video
+  dosyası yok — kamera gerçekten evin içinde geziyor. BOŞLUK ile geçilir.
 - **Üç final** — ikisi seçimle, biri yetişemezsen.
 
 Kabaca **25–40 dakikalık** bir demo.
@@ -97,6 +100,7 @@ js/
   props.js                malzemeler + mobilya üreticileri
   house.js                evin geometrisi, çarpışma, kat sistemi, yerleşim
   varlik.js               evde dolaşan şey: doğuş, yaklaşma, donma, yakalama
+  sinema.js               motor içi ara sahneler (kamera yolculuğu + altyazı)
   audio.js                WebAudio ses sentezi + Türkçe seslendirme
   ui.js                   HUD, anı paneli, envanter defteri, final
   player.js               kontroller, çarpışma, el feneri

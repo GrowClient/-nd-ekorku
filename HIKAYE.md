@@ -123,6 +123,22 @@ söylenmez. Boyu bir çocuğunki kadardır.
   uyanır. Envanter kaybolmaz.
 - Geri sayım başladığında hızlanır (1,35 m/s) ve daha sık doğar.
 - Panel açıkken (okurken, şifre girerken) tamamen durur.
+- **Geldiğini gösterir:** yaklaştıkça ekranın o yanından karanlık sızar ve
+  nabız gibi atar; arkadaysa iki kenardan birden. Kalp atışı hızlanır,
+  fener bozulur. Yani sürpriz değil, *yaklaşan* bir şey.
+
+## Ara sahneler
+
+Motor içi; video dosyası yok, kamera gerçekten evin içinde geziyor.
+
+- **Açılış (4 çekim, ~24 sn):** duran saat → anneannenin koltuğu →
+  merdivene doğru yükselen bakış → antrede oyuncunun başlangıç yerine oturma.
+- **Son "Kendi Yerine Geç" (3 çekim):** sarnıç kapağına iniş, "U — M — U — T",
+  sonra yukarı, karanlığa.
+- **Son "Devralan" (3 çekim):** kapağa son bakış, bodrumdan uzaklaşma,
+  antrede kapalı ön kapı.
+- **Son "Yetişemedin" (3 çekim):** merdiven başından aşağı iniş; alt katta
+  bir siluet bekliyor ve kamera ona doğru alçalıyor.
 
 ## Sessiz olaylar (belirsiz doğaüstü)
 

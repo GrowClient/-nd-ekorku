@@ -18,6 +18,9 @@ const Varlik = {
   ekmekKirintisi: [],
   kirintiSayaci: 0,
   yakalanmaSayisi: 0,
+  yakinlik: 0,          // 0..1 — ekran efekti için
+  ekranSag: 0,          // -1 sol, +1 sağ, 0 arkada
+  kalpSayaci: 0,
   isin: new THREE.Raycaster(),
 
   kur(sahne) {
@@ -136,6 +139,7 @@ const Varlik = {
     this.yakalanmaSayisi++;
     Ses.korku(); Ses.kalp(1.6);
     Durum.karartma = 1;
+    this.yakinlik = 0;
     this.durum = 'uyku';
     this.bekleme = 55;
     this.mesh.visible = false;
@@ -157,12 +161,38 @@ const Varlik = {
     }, 1100);
   },
 
+  /* Ekran efekti: ne kadar yakın ve hangi yanda */
+  yakinlikGuncelle(dt, kamera, mesafe) {
+    const menzil = 11;
+    let hedef = 0;
+    if (this.durum === 'yaklasiyor' || this.durum === 'donuk')
+      hedef = Math.max(0, Math.min(1, (menzil - mesafe) / menzil));
+    if (this.durum === 'donuk') hedef *= .5;       // bakınca sakinleşir
+    this.yakinlik += (hedef - this.yakinlik) * Math.min(1, dt * 2.2);
+
+    const ileri = new THREE.Vector3();
+    kamera.getWorldDirection(ileri); ileri.y = 0; ileri.normalize();
+    const sag = new THREE.Vector3(-ileri.z, 0, ileri.x);
+    const yon = new THREE.Vector3(this.poz.x - Oyuncu.poz.x, 0, this.poz.z - Oyuncu.poz.z).normalize();
+    this.ekranSag = yon.dot(ileri) < -.2 ? 0 : (yon.dot(sag) > 0 ? 1 : -1);
+
+    // kalp atışı yaklaştıkça hızlanır
+    if (this.yakinlik > .18) {
+      this.kalpSayaci -= dt;
+      if (this.kalpSayaci <= 0) {
+        Ses.kalp(.5 + this.yakinlik * .9);
+        this.kalpSayaci = 1.5 - this.yakinlik * .95;
+      }
+    }
+  },
+
   guncelle(dt, kamera) {
-    if (!this.aktif || Durum.bitti) return;
-    if (Arayuz.acikPanel) return;        // okurken/şifre girerken durur
+    if (!this.aktif || Durum.bitti) { this.yakinlik = 0; return; }
+    if (Arayuz.acikPanel || Durum.sinema) { this.yakinlik *= .9; return; }
     this.kirintiBirak(dt);
 
     if (this.durum === 'uyku') {
+      this.yakinlik *= .93;
       this.bekleme -= dt * (Durum.gerisayimAktif ? 1.7 : 1);
       if (this.bekleme <= 0) {
         const p = this.dogumYeriBul(kamera);
@@ -181,6 +211,7 @@ const Varlik = {
 
     const gorunur = this.gorunuyorMu(kamera);
     const mesafe = Math.hypot(Oyuncu.poz.x - this.poz.x, Oyuncu.poz.z - this.poz.z);
+    this.yakinlikGuncelle(dt, kamera, mesafe);
 
     if (this.durum === 'yaklasiyor') {
       if (gorunur) { this.durum = 'donuk'; this.bakilanSure = 0; }
