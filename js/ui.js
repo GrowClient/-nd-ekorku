@@ -20,7 +20,11 @@ const Arayuz = {
       karart: $('#karart'), fener: $('#fenerIkon'),
       sayim: $('#gerisayim'), sayimBar: $('#gerisayimBar'), sayimYazi: $('#gerisayimYazi'),
       kilitPerde: $('#kilitPerde'), kilitKart: $('#kilitKart'),
+      menuPerde: $('#menuPerde'), menuKart: $('#menuKart'), hedef: $('#hedef'),
+      devam: $('#devam'),
     };
+    if (Kayit.varMi()) this.el.devam.classList.remove('gizli');
+    this.el.devam.addEventListener('click', () => this.oyunuBaslat(true));
 
     $('#basla').addEventListener('click', () => this.oyunuBaslat());
 
@@ -34,6 +38,10 @@ const Arayuz = {
         else if (e.code === 'Escape') this.esyaKapat();
       } else if (this.acikPanel === 'defter') {
         if (e.code === 'Escape') this.defterCevir();
+      } else if (this.acikPanel === 'menu') {
+        if (e.code === 'Escape') this.menuKapat();
+      } else if (e.code === 'Escape' && !Durum.sinema) {
+        this.menuAc();
       }
     });
 
@@ -53,13 +61,20 @@ const Arayuz = {
     $('#kontroller').innerHTML = IPUCLARI.join('<br>');
   },
 
-  oyunuBaslat() {
-    Ses.baslat(); Ses.devamEt();
+  oyunuBaslat(devam) {
+    Ses.baslat(); Ses.devamEt(); Ayar.uygula();
     this.el.giris.style.transition = 'opacity 1.4s';
     this.el.giris.style.opacity = '0';
     setTimeout(() => {
       this.el.giris.classList.add('gizli');
       Durum.basladi = true;
+      if (devam && Kayit.geriYukle()) {
+        const c = document.querySelector('canvas');
+        if (c) c.requestPointerLock();
+        this.fisilti('Kaldığım yerdeyim. Defter hâlâ elimde.');
+        return;
+      }
+      Kayit.sil();
       Sinema.oynat(SAHNELER.acilis, () => {
         const c = document.querySelector('canvas');
         if (c) c.requestPointerLock();
@@ -68,9 +83,98 @@ const Arayuz = {
     }, 1400);
   },
 
+  /* Duraklatma menüsü YALNIZCA gerçekten kilitliyken kilit bırakılırsa açılır.
+     Panel kapanışında imleç bir an serbest kalıyor; o an menü açılmamalı. */
   imlecDurumu(kilitli) {
-    if (!kilitli && Durum.basladi && !this.acikPanel && !Durum.bitti)
-      this.ipucuGoster('<b>TIKLA</b> devam et');
+    if (kilitli) { this.kilitliydi = true; return; }
+    if (!this.kilitliydi) return;
+    this.kilitliydi = false;
+    if (performance.now() < (this.kilitBekleme || 0)) return;
+    if (Durum.basladi && !this.acikPanel && !Durum.bitti && !Durum.sinema)
+      this.menuAc();
+  },
+
+  /* panel açıp kaparken imleç kilidi zıplar — menüyü kısa süre bastır */
+  kilitBekletme() { this.kilitBekleme = performance.now() + 700; },
+
+  /* ══════════════ DURAKLAT / AYARLAR ══════════════ */
+  menuAc() {
+    if (this.acikPanel || Durum.bitti) return;
+    this.acikPanel = 'menu';
+    Kayit.kaydet(true);
+    document.exitPointerLock && document.exitPointerLock();
+    this.menuCiz();
+    this.el.menuPerde.classList.add('gor');
+  },
+
+  menuKapat() {
+    this.kilitBekletme();
+    this.el.menuPerde.classList.remove('gor');
+    this.acikPanel = null;
+    const c = document.querySelector('canvas');
+    if (c && !Durum.bitti) c.requestPointerLock();
+  },
+
+  menuCiz() {
+    const A = Ayar.v;
+    const kaydirak = (id, ad, deger, min, max, adim, birim) =>
+      '<div class="ayarSatir"><label>' + ad + '</label>' +
+      '<input type="range" id="ay_' + id + '" min="' + min + '" max="' + max +
+      '" step="' + adim + '" value="' + deger + '">' +
+      '<span class="ayarDeger" id="ayd_' + id + '">' +
+      Math.round(deger * (birim || 100)) + (birim ? '' : '%') + '</span></div>';
+    const anahtarKutu = (id, ad, acik) =>
+      '<div class="ayarSatir"><label>' + ad + '</label>' +
+      '<button class="anahtar' + (acik ? ' acik' : '') + '" id="ay_' + id + '">' +
+      (acik ? 'AÇIK' : 'KAPALI') + '</button><span></span></div>';
+
+    this.el.menuKart.innerHTML =
+      '<div class="ustBilgi">Duraklatıldı</div>' +
+      '<h2 class="baslik">Ayarlar</h2>' +
+      '<div class="katalog">İlerlemen otomatik kaydediliyor. Tarayıcıyı kapatsan bile ' +
+      'kaldığın yerden devam edebilirsin.</div>' +
+      kaydirak('parlaklik', 'Parlaklık', A.parlaklik, .55, 2.0, .05) +
+      kaydirak('duyarlilik', 'Fare duyarlılığı', A.duyarlilik, .3, 2.5, .05) +
+      kaydirak('ses', 'Ses', A.ses, 0, 1, .05) +
+      kaydirak('muzik', 'Müzik', A.muzik, 0, 1, .05) +
+      anahtarKutu('bob', 'Baş sallanması', A.bob) +
+      anahtarKutu('gren', 'Film greni', A.gren) +
+      anahtarKutu('tersY', 'Y eksenini ters çevir', A.tersY) +
+      anahtarKutu('golge', 'Gölgeler (performans)', A.golge) +
+      anahtarKutu('seslendirme', 'Türkçe seslendirme', A.seslendirme) +
+      '<div class="altBilgi"><button class="menuDugme" id="mnYeni">Yeniden başla</button>' +
+      '<button class="menuDugme birincil" id="mnDevam">Devam et</button></div>';
+
+    ['parlaklik', 'duyarlilik', 'ses', 'muzik'].forEach(id => {
+      const el = $('#ay_' + id);
+      el.addEventListener('input', () => {
+        Ayar.v[id] = +el.value;
+        $('#ayd_' + id).textContent = Math.round(el.value * 100) + '%';
+        Ayar.kaydet();
+      });
+    });
+    ['bob', 'gren', 'tersY', 'golge', 'seslendirme'].forEach(id => {
+      const el = $('#ay_' + id);
+      el.addEventListener('click', () => {
+        Ayar.v[id] = !Ayar.v[id];
+        el.classList.toggle('acik', Ayar.v[id]);
+        el.textContent = Ayar.v[id] ? 'AÇIK' : 'KAPALI';
+        Ayar.kaydet();
+      });
+    });
+    $('#mnDevam').addEventListener('click', () => this.menuKapat());
+    $('#mnYeni').addEventListener('click', () => {
+      if (!confirm('Baştan başlansın mı? Kayıtlı ilerleme silinecek.')) return;
+      Kayit.sil(); location.reload();
+    });
+  },
+
+  /* ══════════════ HEDEF GÖSTERGESİ ══════════════ */
+  hedefGuncelle() {
+    if (!Durum.basladi || Durum.bitti) return;
+    let m = '';
+    for (const h of HEDEFLER) { try { if (h.kosul(Durum)) { m = h.metin; break; } } catch (e) {} }
+    if (m !== this._sonHedef) { this._sonHedef = m; this.el.hedef.textContent = m; }
   },
 
   /* ── HUD ────────────────────────────────────────────────────────── */
@@ -137,6 +241,7 @@ const Arayuz = {
     this.sayacGuncelle();
     this.fisilti(e.kisa || e.katalog);
     Ses.sayfa();
+    if (yeni) Kayit.kaydet(true);
     const s = Durum.gercekSeviyesi();
     if (e.yanki && !yeni && s >= 1) setTimeout(() => this.fisilti(e.yanki), 6200);
   },
@@ -148,6 +253,7 @@ const Arayuz = {
     this.aktifEsya = id;
     this.beatIndex = 0;
     this.acikPanel = 'esya';
+    this.kilitBekletme();
     document.exitPointerLock && document.exitPointerLock();
 
     const yeni = !Durum.esyaVar(id);
@@ -174,7 +280,7 @@ const Arayuz = {
     Ses.sayfa();
     this.esyaDevam(true);
 
-    if (yeni && !ayar.tam) Durum.esyaAl(id);
+    if (yeni && !ayar.tam) { Durum.esyaAl(id); Kayit.kaydet(true); }
     this.sayacGuncelle();
   },
 
@@ -196,6 +302,7 @@ const Arayuz = {
   },
 
   esyaKapat() {
+    this.kilitBekletme();
     const id = this.aktifEsya;
     const defterdenGeldi = this.defterDonus;
     this.el.esyaPerde.classList.remove('gor');
@@ -212,6 +319,7 @@ const Arayuz = {
   defterCevir() {
     if (this.acikPanel === 'esya') return;
     if (this.acikPanel === 'defter') {
+      this.kilitBekletme();
       this.el.defterPerde.classList.remove('gor');
       this.acikPanel = null;
       const c = document.querySelector('canvas');
@@ -221,6 +329,7 @@ const Arayuz = {
     this.defterCiz();
     this.el.defterPerde.classList.add('gor');
     this.acikPanel = 'defter';
+    this.kilitBekletme();
     document.exitPointerLock && document.exitPointerLock();
     Ses.sayfa();
   },
@@ -279,6 +388,7 @@ const Arayuz = {
     this.kilitGiris = '';
     this.kilitDeneme = 0;
     this.acikPanel = 'kilit';
+    this.kilitBekletme();
     document.exitPointerLock && document.exitPointerLock();
     this.kilitCiz();
     this.el.kilitPerde.classList.add('gor');
@@ -320,6 +430,7 @@ const Arayuz = {
       Ses.vurgu();
       const id = this.kilitEsya;
       Durum.kilitAcildi[id] = true;
+      Kayit.kaydet(true);
       this.el.kilitPerde.classList.remove('gor');
       this.acikPanel = null;
       this.bildirim('KİLİT AÇILDI');
@@ -335,6 +446,7 @@ const Arayuz = {
   },
 
   kilitKapat() {
+    this.kilitBekletme();
     this.el.kilitPerde.classList.remove('gor');
     this.acikPanel = null;
     const c = document.querySelector('canvas');
@@ -404,11 +516,24 @@ const Arayuz = {
     s.style.transition = 'opacity .9s';
     setTimeout(() => {
       s.style.opacity = '1';
+      Kayit.sil();
+      const ist = Kayit.sonuKaydet(id);
+      const gorulen = Object.keys(ist.sonlar || {}).length;
       s.innerHTML = '<div class="kutu"><h2>' + son.baslik + '</h2>' +
         son.paragraflar.map(p => '<p>' + p + '</p>').join('') +
+        (Durum.bayrak.f_gizli ? '<p>' + FINAL.gizliEk + '</p>' : '') +
         '<div class="kapanis">' + epilog + '</div>' +
-        '<div class="imza">Miras · ' + Durum.sayac + '/' + Durum.toplamEsya +
-        ' eşya kataloglandı</div></div>';
+        '<div class="ozet">' +
+        '<div><b>' + Durum.sayac + ' / ' + Durum.toplamEsya + '</b>eşya kataloglandı</div>' +
+        '<div><b>' + gorulen + ' / 3</b>final görüldü</div>' +
+        '<div><b>' + (Durum.bayrak.f_gizli ? 'bulundu' : 'bulunamadı') + '</b>' +
+        'döşeme altındaki kutu</div></div>' +
+        '<div class="imza">Miras · Kavaklı Sokak No. 7' +
+        (Durum.sayac < Durum.toplamEsya ? ' · bu evde hâlâ konuşmayı bekleyen ' +
+          (Durum.toplamEsya - Durum.sayac) + ' şey var' : '') + '</div>' +
+        '<div style="text-align:center;margin-top:34px">' +
+        '<button class="dugme" onclick="Kayit.sil();location.reload()">Yeniden oyna</button></div>' +
+        '</div>';
       s.style.opacity = '1';
       Ses.gerilim(0);
       Ses.vurgu();

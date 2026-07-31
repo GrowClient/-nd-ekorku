@@ -517,6 +517,11 @@ const Ev = {
 
     /* ---- SALON ---- */
     etk(kati(koy(P.vitrin(), 14.6, 0, 7.0, -Math.PI / 2)), 'vitrin');
+    const bayram = new THREE.Group();
+    kutu(bayram, .26, .21, .03, M.ahsapKoyu, 0, .105, 0);
+    kutu(bayram, .21, .16, .01, M.foto, 0, .105, .02);
+    kutu(bayram, .04, .14, .02, M.ahsapKoyu, 0, .07, -.06, .5);
+    koy(bayram, 14.5, 1.9, 6.35, -Math.PI / 2 + .3); etk(bayram, 'bayram_fotografi');
     etk(kati(koy(P.dikisMakinesi(), 10.4, 0, 6.1, .3)), 'dikis');
     kati(koy(P.masa(1.6, .95, .76), 12.4, 0, 9.3));
     [[-1.0, 0, Math.PI / 2], [1.0, 0, -Math.PI / 2], [0, -.78, 0], [0, .78, Math.PI]]
@@ -568,6 +573,11 @@ const Ev = {
     for (let i = 0; i < 5; i++) kutu(perv, .125, .01, .012, M.siyah, 0, .8 + i * .062, .112);
     for (let i = 0; i < 3; i++) kutu(perv, .125, .01, .012, M.siyah, 0, 1.19 + i * .07, .112);
     koy(perv, 5.4, 0, 7.42); etk(perv, 'cizelge');
+    const tkv = new THREE.Group();
+    kutu(tkv, .28, .40, .015, M.kagit, 0, 0, 0);
+    kutu(tkv, .28, .09, .02, M.ahsapKoyu, 0, .17, .005);
+    silindir(tkv, .008, .008, .05, M.metal, 0, .23, 0);
+    koy(tkv, 5.35, 1.62, 6.6, -Math.PI / 2); etk(tkv, 'takvim');
 
     const cek = new THREE.Group();
     kutu(cek, .17, .18, .62, M.ahsap, 0, 0, 0);
@@ -605,6 +615,12 @@ const Ev = {
 
     /* ---- ÇOCUK ODASI ---- */
     etk(kati(koy(P.karyola(), 1.3, KAT.ust, 10.2)), 'yatak');
+    const tahta = new THREE.Mesh(G.kutu, M.doseme);
+    tahta.scale.set(.26, .045, 1.0);
+    tahta.position.set(2.15, KAT.ust + .028, 10.3);
+    tahta.receiveShadow = true; S.add(tahta);
+    etk(tahta, 'gizli_bolme');
+    Ev.dinamik.gizliTahta = tahta;
     kati(koy(P.gardirop(1.3, 2.0, .58), 4.65, KAT.ust, 6.8, -Math.PI / 2));
     const kutuAyi = new THREE.Group();
     kutu(kutuAyi, .44, .2, .32, M.karton, 0, .1, 0);
@@ -633,6 +649,13 @@ const Ev = {
     const ayn = P.aynaliDolap();
     ayn.position.set(1.1, KAT.ust + 1.5, .42);
     S.add(ayn); etk(ayn, 'ayna');
+    const ecza = new THREE.Group();
+    kutu(ecza, .34, .40, .16, M.ahsap, 0, 0, 0);
+    kutu(ecza, .30, .03, .14, M.toz, 0, .06, .01);
+    kutu(ecza, .07, .11, .05, M.kagit, -.08, .13, .02);
+    kutu(ecza, .07, .11, .05, M.kagit, .02, .13, .02);
+    silindir(ecza, .03, .03, .1, M.cam, .11, .13, .02);
+    koy(ecza, 2.3, KAT.ust + 1.45, .40); etk(ecza, 'ecza_dolabi');
     const kuvet = new THREE.Group();
     kutu(kuvet, 1.7, .56, .8, M.toz, 0, .28, 0);
     kutu(kuvet, 1.54, .42, .64, M.siyah, 0, .38, 0);
@@ -666,6 +689,10 @@ const Ev = {
     kati(koy(P.raf(1.2, 1.7, .3, 3), 10.3, KAT.ust, 4.5, Math.PI));
     kati(koy(P.koli(.5, .36, .4), 10.5, KAT.ust, 1.2, .4));
     kati(koy(P.bavul(), 10.4, KAT.ust, 3.2, -.3));
+    const hesap = new THREE.Mesh(G.kutu, M.kagit);
+    hesap.scale.set(.22, .035, .3);
+    hesap.position.set(10.3, KAT.ust + 1.18, 4.45); hesap.rotation.y = .25;
+    S.add(hesap); etk(hesap, 'hesap_defteri');
 
     /* ---- TAVAN ARASI ---- */
     const albumG = new THREE.Group();
@@ -683,6 +710,10 @@ const Ev = {
     kutu(evrakG, .44, .24, .34, M.metal, 0, .12, 0);
     kutu(evrakG, .46, .035, .36, M.metal, 0, .25, 0);
     koy(evrakG, 8.8, KAT.catik, 5.6, -.5); etk(evrakG, 'evraklar');
+    const asi = new THREE.Mesh(G.kutu, M.kagit);
+    asi.scale.set(.16, .01, .22);
+    asi.position.set(9.35, KAT.catik + .06, 6.1); asi.rotation.y = .8;
+    S.add(asi); etk(asi, 'asi_karti');
 
     kati(koy(P.bavul(), 3.0, KAT.catik, 8.6, .7));
     kati(koy(P.koli(.6, .5, .5), 9.8, KAT.catik, 8.2, .2));
@@ -693,6 +724,12 @@ const Ev = {
 
     /* ---- BODRUM ---- */
     etk(kati(koy(P.sandik(), 1.8, KAT.bodrum, 5.2, .2)), 'sandik');
+    const parca = new THREE.Group();
+    for (let i = 0; i < 4; i++)
+      kutu(parca, .06, 1.05, .5, M.ahsapKoyu, i * .09, .55, 0, .07 + i * .03);
+    kutu(parca, .34, .05, .5, M.ahsapKoyu, .15, .04, .1, .3);
+    kutu(parca, .12, .1, .09, M.kagit, .32, .06, -.14);
+    koy(parca, .55, KAT.bodrum, 1.5, .35); etk(parca, 'sokulmus_karyola');
     kati(koy(P.raf(1.4, 1.7, .32, 3), .5, KAT.bodrum, 3.0, Math.PI / 2));
     kati(koy(P.koli(.5, .4, .42), 3.4, KAT.bodrum, 6.2, .5));
     kati(koy(P.koli(.44, .34, .36), 4.4, KAT.bodrum, 5.6, -.2));

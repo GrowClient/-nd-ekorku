@@ -25,6 +25,7 @@ const Efekt = {
         pozlama: { value: 1.38 },
         varlikYakin: { value: 0 },
         varlikSag:   { value: 0 },
+        grenGuc:     { value: 1 },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -33,7 +34,7 @@ const Efekt = {
       fragmentShader: `
         precision highp float;
         uniform sampler2D tDoku;
-        uniform float zaman, gerilim, nabiz, karart, pozlama, varlikYakin, varlikSag;
+        uniform float zaman, gerilim, nabiz, karart, pozlama, varlikYakin, varlikSag, grenGuc;
         varying vec2 vUv;
 
         float rast(vec2 p){
@@ -96,10 +97,10 @@ const Efekt = {
 
           // film greni
           float gr = rast(vUv * vec2(1280.0, 720.0) + fract(zaman * 0.97) * 137.3);
-          renk += (gr - 0.5) * (0.048 + gerilim * 0.042);
+          renk += (gr - 0.5) * (0.048 + gerilim * 0.042) * grenGuc;
 
           // çok hafif tarama dokusu
-          renk *= 1.0 - 0.016 * sin(vUv.y * 880.0);
+          renk *= 1.0 - 0.016 * grenGuc * sin(vUv.y * 880.0);
 
           renk *= (1.0 - karart);
           gl_FragColor = vec4(clamp(renk, 0.0, 1.0), 1.0);

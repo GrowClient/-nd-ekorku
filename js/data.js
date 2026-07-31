@@ -678,3 +678,130 @@ const SAHNELER = {
       yazi: 'Elini uzatıyor. Ben veriyorum. Otuz üç yıldır bana bir şey uzatıldığında almayı öğrenmişim — ve verilmesi gerektiğinde vermeyi.' },
   ],
 };
+
+/* ═════════════════════════ EK EŞYALAR (v2) ══════════════════════════════
+   Boş kalan odaları dolduran ve hikâyeyi derinleştiren yedi kayıt.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+Object.assign(ESYALAR, {
+
+  ecza_dolabi: {
+    ad: 'Ecza Dolabı',
+    oda: 'Banyo',
+    katalog: 'Aynalı dolabın içi. Beş ilaç kutusu, üçü boş. İki reçete etiketi hâlâ okunuyor.',
+    beats: [
+      { t:'gozlem', s:'İki şurup kutusu. İkisinde de aynı isim yazıyor: DENİZ AYDIN.' },
+      { t:'kupur', s:'ETİKET 1 — düzenleme 04.11.1997 · hasta doğum tarihi 14.03.1993 · veli: SEVİL AYDIN' },
+      { t:'kupur', s:'ETİKET 2 — düzenleme 22.01.2001 · hasta doğum tarihi 02.03.1993 · veli: NESRİN AYDIN' },
+      { t:'celiski', s:'Aynı isim, aynı çocuk, iki farklı doğum tarihi. Eczacı hatası değil — ikisi de bir hekimin kaydından geliyor. Ve ikincisini yazdıran anneannem.' },
+      { t:'ses', s:'Beni doktora götürdüğünde ona bu tarihi kim söyledi? Ve o, nereden biliyordu?' },
+    ],
+    panel: true, tut: [0, 1, 2, 3], bayrak: 'f_ecza',
+    yanki: 'Baştan beri biliyordu. İlk günden. Doktorun kaydına yazdırdığı tarih, yirmi üç yıl sonra zarfların üstüne yazacağı tarihin aynısı.',
+  },
+
+  hesap_defteri: {
+    ad: 'Kareli Hesap Defteri',
+    oda: 'Sandık Odası',
+    katalog: 'Raf üstünde kareli hesap defteri. Dayımın el yazısı. Kırk sayfanın otuz dokuzu boş.',
+    beats: [
+      { t:'gozlem', s:'Tek dolu sayfa. Üstünde tarih aralığı var: Eylül–Kasım 1999. Altında kalemle yazılmış bir masraf listesi.' },
+      { t:'kupur', s:'Bolu — yol ve konaklama (3 kez)\nSosyal Hizmetler — dosya sureti\nNüfus Md. — kayıt düzeltme\nAvukat B. — danışma, 2 saat\nMatbu evrak, harç, vesikalık\n──────────────\nTOPLAM' },
+      { t:'celiski', s:'Kalemler bir tadilat listesi gibi yazılmış. Sıradan, sabırlı, düzenli. Bir çocuğun yerine başka bir çocuk koymanın da bir maliyeti varmış — ve dayım onu kuruşuna kadar yazmış.' },
+      { t:'ses', s:'Son satırın altında tek not: "S. ödedi. Kapandı."' },
+    ],
+    panel: true, tut: [0, 1, 2], bayrak: 'f_hesap',
+  },
+
+  takvim: {
+    ad: '1999 Duvar Takvimi',
+    oda: 'Mutfak',
+    katalog: 'Mutfak kapısının arkasında asılı takvim. Yılı: 1999. Sayfaları yırtılmamış — biri hariç.',
+    kisa: 'Duvarda hâlâ 1999 takvimi asılı. Ocak sayfası koparılmış; kalan on bir ay bomboş.',
+    beats: [
+      { t:'gozlem', s:'Ocak sayfası yok. Koparılmış; kâğıt payı hâlâ telde duruyor.' },
+      { t:'gozlem', s:'Şubat\'tan Aralık\'a kadar bütün sayfalar yerinde ve hepsi bomboş. Tek bir randevu, tek bir doğum günü, tek bir çizik yok.' },
+      { t:'celiski', s:'Bir takvim üstüne hiçbir şey yazılmadığında da bir şey anlatır: o yıl bu evde kimse ileriye dair hiçbir şey planlamamış.' },
+      { t:'ses', s:'Ve 2000\'de değiştirilmemiş. Yirmi altı yıldır bu duvarda aynı yıl asılı duruyor.' },
+    ],
+  },
+
+  bayram_fotografi: {
+    ad: 'Bayram Fotoğrafı, 2000',
+    oda: 'Salon',
+    katalog: 'Vitrinin üstünde ayaklı çerçeve. Renkli baskı, rengi dönmüş. Arka kapakta kurşun kalemle tek kelime.',
+    beats: [
+      { t:'ani', s:'Bunu hatırlıyorum. Bayram sabahı, herkes toplanmıştı, ben en öndeydim.' },
+      { t:'gozlem', s:'Sekiz kişi var. Yedisi birbirine yaslanmış, kollar omuzlarda, aralarında boşluk yok. Bir tanesi — çocuk olan — yarım adım geride duruyor ve kimseye değmiyor.' },
+      { t:'gozlem', s:'Anneannem karede yok. Fotoğrafı çeken o.' },
+      { t:'celiski', s:'Arka kapakta, onun el yazısıyla, tek kelime: "misafir".' },
+    ],
+    panel: true, tut: [1, 2, 3], bayrak: 'f_bayram',
+    yanki: 'Bana bir ad vermeyi reddetti ama yalan da söylemedi. O evde beni tarif eden tek dürüst kelime, o fotoğrafın arkasındaydı.',
+  },
+
+  sokulmus_karyola: {
+    ad: 'Sökülmüş Çocuk Karyolası',
+    oda: 'Bodrum',
+    katalog: 'Duvara dayalı, sökülmüş bir çocuk karyolasının parçaları. Vidalar ayrı bir bez torbada, numaralandırılmış.',
+    beats: [
+      { t:'gozlem', s:'Vidalar torbada duruyor, her biri kâğıda numarayla iliştirilmiş. Kim bir karyolayı sökerken vidalarını numaralandırır?' },
+      { t:'gozlem', s:'Yan tahtanın iç yüzünde kurşun kalemle bir not var — pervazdaki el, pervazdaki kalem. Ve bir tarih: 13.01.1999.' },
+      { t:'celiski', s:'On üç Ocak. Cenazeden bir gün sonra. Birisi o gün aşağı indi, bu yatağı söktü, vidalarını numaraladı ve sakladı. Atmadı — bir gün geri kurulabilsin diye.' },
+    ],
+    panel: true, tut: [0, 1, 2], bayrak: 'f_karyola',
+  },
+
+  asi_karti: {
+    ad: 'Aşı Kartı',
+    oda: 'Tavan Arası',
+    katalog: 'Plastik kılıf içinde sararmış aşı kartı. Ad hanesi doldurulmuş, tarih hanelerinin ilk yarısı boş.',
+    kisa: 'Aşı kartındaki ilk kayıt Kasım 1999 — altı yaşında. Öncesindeki bütün yıllar boş.',
+    beats: [
+      { t:'kupur', s:'DENİZ AYDIN — Doğum: 14.03.1993' },
+      { t:'gozlem', s:'İlk aşı kaydının tarihi: Kasım 1999. Sonrasında hepsi arka arkaya, birkaç ay içinde tamamlanmış.' },
+      { t:'celiski', s:'Bir çocuğun aşı kartı doğduğu hafta açılır. Bunda ilk altı yıl bomboş. Sanki o çocuk altı yaşında doğmuş gibi.' },
+      { t:'ses', s:'Kartın arkasında, farklı bir kalemle tek satır: "önceki kayıt bulunamadı".' },
+    ],
+  },
+
+  /* ── GİZLİ: yalnızca duvar kâğıdı ve ayı incelendikten sonra görünür ── */
+  gizli_bolme: {
+    ad: 'Gevşek Döşeme Tahtası',
+    oda: 'Çocuk Odası',
+    katalog: 'Karyolanın altında, döşemede oynayan bir tahta. Ucundaki çivi bir kere sökülmüş ve bir daha çakılmamış.',
+    gizli: ['f_duvar', 'f_pamuk'],
+    beats: [
+      { t:'gozlem', s:'Tahtayı kaldırıyorum. Altında teneke bir bisküvi kutusu var. Kapağı pas yapmış ama kolayca açılıyor — çok açılmış.' },
+      { t:'gozlem', s:'İçinde: dört cam bilye, kurumuş bir yaprak, bir otobüs bileti (Bolu–Mudurnu, 1999), ve dörde katlanmış bir resim.' },
+      { t:'gozlem', s:'Resimde üç figür var. Bir büyük, bir orta, bir küçük. Küçüğün elini gri saçlı olan tutuyor.' },
+      { t:'celiski', s:'Çizim ikinci elin: sert baskı, kapalı çizgiler, imzasız. Yani bunu ben çizmişim. Ve çizdiğim tek şey, resim defterine hiç koymadığım şeymiş — ona tutunan bir el.' },
+      { t:'ses', s:'Sonra kaldırıp yerin altına saklamışım. Altı yaşındaki bir çocuk bir şeyi neden saklar? Çünkü görülürse elinden alınacağını bilir.' },
+    ],
+    panel: true, tut: [0, 1, 2, 3], bayrak: 'f_gizli',
+    yanki: 'O kutu yirmi beş yıl orada kaldı. Anneannem tahtanın çivisini bir daha hiç çakmadı.',
+  },
+});
+
+/* ── Gizli bulgu, kapanışa fazladan bir paragraf ekler ─────────────────── */
+FINAL.gizliEk = 'Bisküvi kutusunu yanıma aldım. İçindekiler bir çocuğun bütün serveti: dört bilye, bir yaprak, bir bilet ve tutulan bir el. Otuz üç yıl sonra hâlâ aynı serveti taşıyorum, sadece kutusu değişti.';
+
+/* ── Hedef göstergesi: oyuncu ne yapacağını bilsin ─────────────────────── */
+const HEDEFLER = [
+  { kosul: d => !d.anahtarVar('key_kiler'),
+    metin: 'Anneannenin oturma odasına bak — kilerin anahtarı orada bir yerde.' },
+  { kosul: d => !d.ustKat,
+    metin: 'Zemin katı gez, sonra sofadaki merdivenden üst kata çık.' },
+  { kosul: d => !d.anahtarVar('key_tavan'),
+    metin: 'Anneannenin odasındaki tuvalet masasına bak.' },
+  { kosul: d => !(Ev.kapilar.sandikodasi && Ev.kapilar.sandikodasi.acik),
+    metin: 'Üst kattaki kilitli odayı aç — tavan arası oradan çıkıyor.' },
+  { kosul: d => !d.kilitAcildi.evraklar,
+    metin: 'Tavan arasındaki evrak kutusu dört haneli. Evdeki tarihleri hatırla.' },
+  { kosul: d => !d.kilitAcildi.bodrum_kapisi,
+    metin: 'Kilerdeki bodrum kilidi de dört haneli. Anneannemin seçtiği bir gün.' },
+  { kosul: d => !d.bayrak.f_sandik,
+    metin: 'Bodruma in ve çinko sandığı aç.' },
+  { kosul: d => true,
+    metin: 'Taş kemerin ardındaki sarnıca git.' },
+];

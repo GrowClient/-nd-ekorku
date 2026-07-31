@@ -13,11 +13,12 @@ const Ses = {
     if (!AC) return;
     this.ctx = new AC();
     this.ana = this.ctx.createGain();
-    this.ana.gain.value = .9;
+    this.ana.gain.value = (typeof Ayar !== 'undefined') ? Ayar.v.ses : .9;
     this.ana.connect(this.ctx.destination);
     this.gurultuTamponuYap();
     this.odaTonu();
     this.droneKur();
+    this.muzikKur();
     this.hazir = true;
     this.rastgeleOlaylar();
   },
@@ -85,24 +86,96 @@ const Ses = {
   gerilim(seviye) {                       // 0..1
     if (!this.hazir) return;
     this.drone.gain.setTargetAtTime(seviye * .10, this.ctx.currentTime, 2.5);
+    this.muzikSeviye = seviye;
+  },
+
+  /* ── müzik: yavaş bir yaylı yastığı + seyrek tek notalar ────────────
+     Nota dosyası yok; hepsi osilatörle. Gerilime göre akort değişir.  */
+  muzikKur() {
+    const c = this.ctx;
+    this.muzikKazanc = c.createGain();
+    this.muzikKazanc.gain.value = 0;
+    const lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = .4;
+    this.muzikKazanc.connect(lp); lp.connect(this.ana);
+    this.muzikLp = lp;
+    this.muzikSeviye = 0;
+    this.muzikHedef = .75;
+
+    // yastık: dört hafif akortsuz osilatör (la minör)
+    this.yastik = [220, 261.63, 329.63, 440].map((f, i) => {
+      const o = c.createOscillator();
+      o.type = i % 2 ? 'sine' : 'triangle';
+      o.frequency.value = f * (1 + (i - 1.5) * .0016);
+      const g = c.createGain(); g.gain.value = 0;
+      o.connect(g); g.connect(this.muzikKazanc); o.start();
+      return { o, g, temel: f };
+    });
+
+    this.muzikDongu();
+  },
+
+  /* akorttan seyrek tek notalar — piyano gibi, uzun sönümlü */
+  muzikNota(f, guc = 1) {
+    const c = this.ctx, t = c.currentTime;
+    const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+    const o2 = c.createOscillator(); o2.type = 'sine'; o2.frequency.value = f * 2.004;
+    const g = c.createGain(), g2 = c.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(.055 * guc, t + .012);
+    g.gain.exponentialRampToValueAtTime(.0004, t + 3.6);
+    g2.gain.setValueAtTime(0, t);
+    g2.gain.linearRampToValueAtTime(.014 * guc, t + .01);
+    g2.gain.exponentialRampToValueAtTime(.0003, t + 1.5);
+    o.connect(g); o2.connect(g2);
+    g.connect(this.muzikKazanc); g2.connect(this.muzikKazanc);
+    o.start(t); o.stop(t + 3.8); o2.start(t); o2.stop(t + 1.7);
+  },
+
+  muzikDongu() {
+    const dizi = [220, 246.94, 261.63, 293.66, 329.63, 392, 440, 523.25];
+    const tik = () => {
+      if (this.hazir && Durum && Durum.basladi && !Durum.bitti) {
+        const s = this.muzikSeviye || 0;
+        const hedef = (this.muzikHedef ?? .75) * (.05 + s * .10);
+        this.muzikKazanc.gain.setTargetAtTime(hedef, this.ctx.currentTime, 3.5);
+        this.muzikLp.frequency.setTargetAtTime(900 + s * 1400, this.ctx.currentTime, 4);
+        this.yastik.forEach((y, i) => {
+          // gerilim yükseldikçe akor minöre çöker
+          const f = y.temel * (s > .55 && i === 1 ? 0.9438 : 1);
+          y.o.frequency.setTargetAtTime(f * (1 + (i - 1.5) * .0016), this.ctx.currentTime, 6);
+          y.g.gain.setTargetAtTime(.085 - i * .012, this.ctx.currentTime, 5);
+        });
+        if (Math.random() < .35 + s * .25)
+          this.muzikNota(dizi[(Math.random() * dizi.length) | 0], .55 + s * .5);
+      } else if (this.hazir && this.muzikKazanc) {
+        this.muzikKazanc.gain.setTargetAtTime(0, this.ctx.currentTime, 2);
+      }
+      setTimeout(tik, 4200 + Math.random() * 5200);
+    };
+    setTimeout(tik, 3000);
   },
 
   /* ── adım ─────────────────────────────────────────────────────────── */
   adim(tip = 'ahsap') {
     if (!this.hazir || this.kapali) return;
     const c = this.ctx, t = c.currentTime;
+    // yüzeye göre: başlangıç frekansı, sönüm, ses, gıcırdama olasılığı
+    const P = { ahsap: [480, 130, .13, .085, .22], tas: [900, 260, .18, .080, .04],
+                karo:  [1500, 420, .10, .075, .0], hali: [300,  90, .17, .045, .02] }[tip]
+             || [480, 130, .13, .085, .22];
     const s = this.gurultu();
     const f = c.createBiquadFilter();
     f.type = 'lowpass';
-    f.frequency.setValueAtTime(tip === 'tas' ? 900 : 480, t);
-    f.frequency.exponentialRampToValueAtTime(tip === 'tas' ? 260 : 130, t + .12);
+    f.frequency.setValueAtTime(P[0], t);
+    f.frequency.exponentialRampToValueAtTime(P[1], t + .12);
     const g = c.createGain();
-    const v = .07 + Math.random() * .03;
+    const v = P[3] + Math.random() * .025;
     g.gain.setValueAtTime(v, t);
-    g.gain.exponentialRampToValueAtTime(.0008, t + (tip === 'tas' ? .18 : .13));
+    g.gain.exponentialRampToValueAtTime(.0008, t + P[2]);
     s.connect(f); f.connect(g); g.connect(this.ana);
-    s.start(t); s.stop(t + .25);
-    if (tip === 'ahsap' && Math.random() < .22) this.gicirti(.25 + Math.random() * .3);
+    s.start(t); s.stop(t + .3);
+    if (Math.random() < P[4]) this.gicirti(.25 + Math.random() * .3);
   },
 
   /* ── ahşap gıcırtısı ──────────────────────────────────────────────── */
@@ -308,8 +381,9 @@ const Konusma = {
     u.volume = o.ses ?? 1;
     // konuşurken ortam sesini kıs
     if (Ses.ana) {
-      Ses.ana.gain.setTargetAtTime(.45, Ses.ctx.currentTime, .3);
-      u.onend = u.onerror = () => Ses.ana.gain.setTargetAtTime(.9, Ses.ctx.currentTime, .6);
+      Ses.ana.gain.setTargetAtTime(((typeof Ayar !== 'undefined') ? Ayar.v.ses : .9) * .5, Ses.ctx.currentTime, .3);
+      const geri = (typeof Ayar !== 'undefined') ? Ayar.v.ses : .9;
+      u.onend = u.onerror = () => Ses.ana.gain.setTargetAtTime(geri, Ses.ctx.currentTime, .6);
     }
     speechSynthesis.speak(u);
     return true;

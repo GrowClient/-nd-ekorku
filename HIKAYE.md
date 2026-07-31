@@ -92,6 +92,13 @@ Her eşyanın taşıdığı çelişki, aynı beş gerçeğe çıkar.
 | Evrak kutusu | İki nüfus kaydı, aynı isim | Biri kapalı. Diğeri sensin. |
 | Anneannenin sandığı | Yirmi üç yıllık mektup | Gerçek, onun ağzından |
 | Sarnıç kapağı | Harca parmakla yazılmış: DENİZ | Adın yazılıydı — ama senin adın değildi |
+| Ecza dolabı | İki reçete, aynı isim, iki doğum tarihi | İkincisini **anneanne** yazdırmış: gerçeği baştan biliyordu |
+| Hesap defteri | Orhan'ın 1999 masraf listesi | Bir çocuğun yerine başkasını koymanın faturası |
+| 1999 takvimi | Ocak koparılmış, kalan aylar boş | O yıl kimse ileriye dair hiçbir şey planlamamış |
+| Bayram fotoğrafı 2000 | Yedi kişi sarılmış, biri yarım adım geride | Arkasında anneannenin el yazısı: "misafir" |
+| Sökülmüş karyola | Vidalar numaralı, tarih 13.01.1999 | Cenazeden bir gün sonra; atılmamış, saklanmış |
+| Aşı kartı | İlk kayıt altı yaşında | O çocuk kâğıt üzerinde altı yaşında doğmuş |
+| **Gizli:** döşeme tahtası | Bisküvi kutusu: bilyeler, bilet, bir resim | İkinci çocuğun sakladığı tek şey: tutulan bir el |
 
 ## İlerleyiş
 
@@ -149,6 +156,14 @@ Hiçbiri açıklanmaz, hiçbiri kanıtlanmaz:
 - Tavan arasına ilk çıkışta **antredeki ampul söner**.
 - Evraklar okunduktan sonra **koltuk kapıya döner** ve el feneri sararır.
 - Bodrumda su damlar — evin suyu yıllar önce kesilmiştir.
+
+## Gizli bulgu
+
+Çocuk odasında, karyolanın yanındaki gevşek döşeme tahtası **yalnızca duvar
+kâğıdı ve peluş ayı incelendikten sonra** etkileşime açılır. Altındaki
+bisküvi kutusunda ikinci çocuğun sakladığı şeyler var — ve resim defterine
+hiç koymadığı bir çizim: anneannenin elini tutan bir çocuk. Bulunursa
+kapanışa fazladan bir paragraf ekleniyor.
 
 ## Finaller
 

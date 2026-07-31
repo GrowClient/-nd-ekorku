@@ -35,7 +35,7 @@ python3 -m http.server 8000
 | `F` | el feneri |
 | `Tab` | envanter defteri (bir satıra tıkla → o eşyanın tam kaydı) |
 | `M` | Türkçe seslendirmeyi aç/kapat |
-| `Esc` | imleci bırak |
+| `Esc` | duraklat / ayarlar |
 
 ---
 
@@ -43,7 +43,7 @@ python3 -m http.server 8000
 
 - **Gerçek 3B ev** — dört kat: bodrum, zemin, üst kat, tavan arası. On üç
   mekân, çalışan merdivenler, kilitli kapılar, anahtar ilerleyişi.
-- **29 kataloglanabilir eşya.** Her biri üç katmanlı: kuru bir *eksper notu*,
+- **36 kataloglanabilir eşya** (biri gizli.) Her biri üç katmanlı: kuru bir *eksper notu*,
   senin *anın*, ve ikisi arasındaki *çelişki*.
 - **Okuma zorlamaz.** Çoğu eşya oyunu durdurmaz — ekranın altında tek satır
   geçer. Yalnızca hikâyenin omurgasındaki 11 eşya tam ekran açar. Tam
@@ -64,7 +64,18 @@ python3 -m http.server 8000
 - **Ara sahneler.** Açılış ve üç finalin her biri motor içi kamera
   yolculuğu: siyah bantlar, altyazı, evin içinde yavaş çekimler. Video
   dosyası yok — kamera gerçekten evin içinde geziyor. BOŞLUK ile geçilir.
-- **Üç final** — ikisi seçimle, biri yetişemezsen.
+- **Üç final** — ikisi seçimle, biri yetişemezsen. Kapanışta özet: kaç eşya
+  bulundun, kaç final gördün, gizli kutuyu buldun mu.
+- **Otomatik kayıt.** Her eşyada, her kilitte, her duraklatmada kaydediliyor.
+  Tarayıcıyı kapatıp günler sonra "Devam et" diyebilirsin.
+- **Ayarlar menüsü** (`Esc`): parlaklık, fare duyarlılığı, ses, müzik, baş
+  sallanması, film greni, ters Y, gölgeler, seslendirme. Hepsi anında
+  uygulanır ve saklanır. Karanlık bir oyunda parlaklık ayarı şart.
+- **Hedef göstergesi.** Ekranın sağ altında, o an ne yapman gerektiğini
+  söyleyen tek satır. Dört katlı bir evde kaybolmayasın diye.
+- **Müzik.** Seyrek, tonal bir katman — yastık akoru + tek tek düşen notalar.
+  Gerilim yükseldikçe akor minöre çöküyor. Nota dosyası yok, osilatörle.
+- **Yüzeye göre adım sesi:** ahşap, karo, taş, halı.
 
 Kabaca **25–40 dakikalık** bir demo.
 

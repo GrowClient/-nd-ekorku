@@ -47,6 +47,8 @@
     Arayuz.girisMetni();
     Arayuz.sayacGuncelle();
     Arayuz.fenerDurum(true, false);
+    Ayar.yukle();
+    gizliEsyalariAyarla();
 
     addEventListener('resize', () => {
       kamera.aspect = innerWidth / innerHeight;
@@ -62,6 +64,19 @@
 
     saat = new THREE.Clock();
     dongu();
+  }
+
+  /* Gizli eşyalar koşulları sağlanana kadar etkileşimden çıkarılır */
+  function gizliEsyalariAyarla() {
+    Ev.etkilesimliler.forEach(o => {
+      const e = ESYALAR[o.userData.esya];
+      if (e && e.gizli) o.userData.gizliKosul = e.gizli;
+    });
+  }
+  function gizliAcikMi(o) {
+    const k = o.userData.gizliKosul;
+    if (!k) return true;
+    return k.every(b => Durum.bayrak[b]);
   }
 
   /* ── vurgulama ──────────────────────────────────────────────────── */
@@ -97,6 +112,7 @@
       let o = v.object;
       while (o && !o.userData.esya && !o.userData.kapi) o = o.parent;
       if (!o) return null;                                 // önce başka bir yüzey var
+      if (!gizliAcikMi(o)) return null;                    // henüz görünmeyen gizli eşya
       let kok = o;
       while (kok.parent && kok.parent !== sahne) kok = kok.parent;
       return { kok, esya: o.userData.esya, kapiId: o.userData.kapi };
@@ -215,6 +231,8 @@
       Durum.gerisayimGuncelle(dt);
       Varlik.guncelle(dt, kamera);
       Arayuz.gerisayimGuncelle();
+      Arayuz.hedefGuncelle();
+      Kayit.kaydet();
       ipucuGuncelle();
       Arayuz.fenerDurum(Oyuncu.fenerAcik, Durum.pilZayif);
     } else if (!Durum.basladi && !Durum.sinema) {

@@ -18,6 +18,8 @@ const Oyuncu = {
   adimSayaci: 0,
   koridorHizi: 0,
   duyarlilik: .0022,
+  bobAcik: true,
+  tersY: false,
   tuslar: {},
   kamera: null,
 
@@ -55,7 +57,7 @@ const Oyuncu = {
     document.addEventListener('mousemove', e => {
       if (!this.kilitli) return;
       this.yon.yaw -= e.movementX * this.duyarlilik;
-      this.yon.pitch -= e.movementY * this.duyarlilik;
+      this.yon.pitch += (this.tersY ? 1 : -1) * e.movementY * this.duyarlilik;
       const s = Math.PI / 2 - .02;
       this.yon.pitch = Math.max(-s, Math.min(s, this.yon.pitch));
     });
@@ -71,6 +73,24 @@ const Oyuncu = {
 
     this.yerdeY = Ev.zeminYuksekligi(this.poz.x, this.poz.z, 0) ?? 0;
     this.poz.y = this.yerdeY;
+  },
+
+  /* Ayak altındaki yüzey — adım sesi buna göre değişir */
+  zeminTipi() {
+    const x = this.poz.x, z = this.poz.z, y = this.poz.y;
+    if (y < -1) return 'tas';
+    if (y > 5.4) return 'ahsap';
+    if (y > 2.2) {
+      if (x < 5.5 && z < 5) return 'karo';                       // banyo
+      if (x < 5.5 && z > 7.8 && z < 9.8 && x > 1.7 && x < 3.7) return 'hali';
+      if (x > 9.5 && z > 6.9 && z < 9.9 && x < 13.8) return 'hali';
+      return 'ahsap';
+    }
+    if (x < 5.5 && z > 1.7) return 'karo';                       // mutfak + kiler
+    if (x > 6.5 && x < 8.5 && z > 6.6 && z < 11) return 'hali';  // antre halısı
+    if (x > 10.7 && x < 14.1 && z > 7.6 && z < 11) return 'hali';
+    if (x > 11 && x < 13.8 && z > 1.4 && z < 4.2) return 'hali';
+    return 'ahsap';
   },
 
   fenerCevir() {
@@ -147,8 +167,9 @@ const Oyuncu = {
     /* --- baş sallanması --- */
     const hizBuyuk = Math.hypot(this.hiz.x, this.hiz.z);
     this.bobFaz += hizBuyuk * dt * 3.6;
-    const bobY = Math.sin(this.bobFaz * 2) * (kos ? .055 : .032) * Math.min(1, hizBuyuk);
-    const bobX = Math.cos(this.bobFaz) * (kos ? .035 : .02) * Math.min(1, hizBuyuk);
+    const bobK = this.bobAcik ? 1 : 0;
+    const bobY = Math.sin(this.bobFaz * 2) * (kos ? .055 : .032) * Math.min(1, hizBuyuk) * bobK;
+    const bobX = Math.cos(this.bobFaz) * (kos ? .035 : .02) * Math.min(1, hizBuyuk) * bobK;
 
     /* --- adım sesi --- */
     if (hizBuyuk > .35) {
@@ -156,7 +177,7 @@ const Oyuncu = {
       const aralik = kos ? .78 : .95;
       if (this.adimSayaci > aralik) {
         this.adimSayaci = 0;
-        Ses.adim(this.poz.y < -1 ? 'tas' : 'ahsap');
+        Ses.adim(this.zeminTipi());
       }
     }
 
