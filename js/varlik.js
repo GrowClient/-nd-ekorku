@@ -247,10 +247,13 @@ const Varlik = {
     this.mesh.rotation.y = Math.atan2(Oyuncu.poz.x - this.poz.x, Oyuncu.poz.z - this.poz.z);
     this.mesh.visible = this.saydam > .02;
 
-    // yakınken fener bozulur
+    // Yakınken fener bozulur — ama SÖNMEZ. Amaç görüşü kesmek değil,
+    // ışığın huzursuzlandığını hissettirmek: hafif kısılma + ara sıra kırpışma.
     if (mesafe < 7 && this.durum !== 'uyku') {
-      const bozulma = 1 - (7 - mesafe) / 7 * .55;
-      Oyuncu.fener.intensity *= bozulma + Math.random() * .12;
+      const yakinOran = (7 - mesafe) / 7;                 // 0..1
+      let c = 1 - yakinOran * .18;
+      if (Math.random() < .09) c *= .74;                  // kısa kırpışma
+      Oyuncu.fenerCarpan = Math.max(.66, c);
       if (Math.random() < .012) Ses.adim('ahsap');
     }
   },

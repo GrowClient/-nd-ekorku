@@ -14,6 +14,8 @@ const Oyuncu = {
   dondu: false,
   fener: null,
   fenerAcik: true,
+  fenerTaban: 0,        // yumuşatılmış temel güç
+  fenerCarpan: 1,       // dış etkiler (varlık) buradan kısar; kendiliğinden 1'e döner
   bobFaz: 0,
   adimSayaci: 0,
   koridorHizi: 0,
@@ -190,8 +192,11 @@ const Oyuncu = {
     k.rotateZ(bobX * .045);
 
     /* --- fener --- */
-    const hedefGuc = this.fenerAcik ? (Durum.pilZayif ? 4.4 : 9.8) : 0;
-    this.fener.intensity += (hedefGuc - this.fener.intensity) * Math.min(1, 6 * dt);
+    const hedefGuc = this.fenerAcik ? (Durum.pilZayif ? 6.4 : 9.8) : 0;
+    this.fenerTaban += (hedefGuc - this.fenerTaban) * Math.min(1, 6 * dt);
+    // çarpan her karede 1'e geri akar; varlık onu aşağı iter ama birikmez
+    this.fenerCarpan += (1 - this.fenerCarpan) * Math.min(1, 5 * dt);
+    this.fener.intensity = this.fenerTaban * this.fenerCarpan;
     this.fenerHalka.intensity = this.fener.intensity * .085;
     this.fener.position.x = .12 + Math.sin(this.bobFaz) * .02;
     this.fener.position.y = -.12 + Math.sin(this.bobFaz * 2) * .015;

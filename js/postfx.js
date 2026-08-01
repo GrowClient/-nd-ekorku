@@ -82,17 +82,19 @@ const Efekt = {
           // vinyet
           renk *= smoothstep(0.95, 0.14, r2 * (1.7 + gerilim * 0.6));
 
-          // VARLIK: yaklaştığı yandan karanlık sızar, nabız gibi atar
+          // VARLIK: yaklaştığı yandan karanlık sızar, nabız gibi atar.
+          // Yalnızca KENARDA kalır — ekranın ortası her zaman okunur durur,
+          // yoksa varlık gelince oyun görülemez hale geliyor.
           if (varlikYakin > 0.001) {
-            float sag = smoothstep(0.26, 1.0, vUv.x);
-            float sol = smoothstep(0.26, 1.0, 1.0 - vUv.x);
+            float sag = smoothstep(0.56, 1.02, vUv.x);
+            float sol = smoothstep(0.56, 1.02, 1.0 - vUv.x);
             float kenar = varlikSag > 0.5 ? sag
-                        : (varlikSag < -0.5 ? sol : max(sag, sol) * 1.15);
+                        : (varlikSag < -0.5 ? sol : max(sag, sol) * 0.80);
             float nb = 0.55 + 0.45 * sin(zaman * (3.4 + varlikYakin * 7.0));
             float g2 = kenar * varlikYakin * (0.45 + 0.55 * nb);
-            renk = mix(renk, renk * vec3(0.16, 0.14, 0.21), clamp(g2, 0.0, 0.92));
-            renk += vec3(0.055, 0.006, 0.010) * g2 * nb;
-            renk *= 1.0 - varlikYakin * 0.10 * nb;          // genel nefes
+            renk = mix(renk, renk * vec3(0.30, 0.26, 0.38), clamp(g2, 0.0, 0.58));
+            // kenarda kızıl sızıntı: karartmadan da fark edilsin
+            renk += vec3(0.075, 0.009, 0.016) * g2 * nb;
           }
 
           // film greni
