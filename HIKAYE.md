@@ -115,9 +115,21 @@ Kiler → bodrum kilidi: ŞİFRE 0203     (2 Mart — gerçek doğum günü)
 Bodrum → sandık → Sarnıç → FİNAL
 ```
 
+### Şifreler
+
+| Kilit | Yer | Kod | Kaynağı |
+|---|---|---|---|
+| Metal evrak kutusu | Tavan arası | **1101** | 11 Ocak — duran saat (11:01), pervazdaki son çizgi, saç lülesinin kâğıdı |
+| Bodrum asma kilidi | Kiler | **0203** | 2 Mart — iade mektupların ikinci tarihi, yurt dosyasındaki gerçek doğum günü |
+
 İki şifre de kasten aynı iki tarihe bağlı: **11 Ocak** (Deniz'in öldüğü gün)
 ve **2 Mart** (Umut'un gerçek doğum günü). Oyuncu kodu ancak metni okuduysa
-çözebilir — okumak artık ilerlemenin şartı.
+çözebilir — okumak ilerlemenin şartı.
+
+Oyun testinde ortaya çıkan tuzak: 11 Ocak evin her yerinde tekrar ettiği
+için oyuncu bodrum kilidine de refleks olarak 1101 giriyor. Bodrum kilidinin
+ipucu metni bu yüzden 11 Ocak'ı **açıkça eliyor**, ve iki yanlış denemeden
+sonra doğrudan iade mektuplara yönlendiren ikinci bir ipucu açılıyor.
 
 ## Varlık
 

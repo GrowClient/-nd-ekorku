@@ -407,7 +407,7 @@ const Arayuz = {
       '<div class="kadran">' + haneler + '</div>' +
       '<div class="kilitMesaj">' + (mesaj || '') + '</div>' +
       '<div class="beat ses" style="margin-top:22px">' + k.ipucu +
-      (this.kilitDeneme >= 3 ? '<br><br>Envanter defterine bak (TAB) — bu tarihi zaten yazmışım.' : '') + '</div>' +
+      (this.kilitDeneme >= 2 && k.ipucu2 ? '<br><br><span style="color:#c2b79c">' + k.ipucu2 + '</span>' : '') + '</div>' +
       '<div class="altBilgi"><span>rakam tuşlarıyla gir</span>' +
       '<span><span class="tus">ENTER</span> dene &nbsp; <span class="tus">ESC</span> vazgeç</span></div>';
   },
