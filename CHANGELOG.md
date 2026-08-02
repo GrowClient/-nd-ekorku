@@ -75,3 +75,14 @@ yer almaz.
   kullanıldığı için doldurulmaz.
 - Bir kullanıcı şu anda tek firmaya bağlıdır; firma değiştirme arayüzü sonraki
   aşamada eklenecektir.
+
+---
+
+## [Yayınlanmadı]
+
+### Eklendi
+- Cloud Run için çok aşamalı `Dockerfile` ve `.dockerignore`; Next.js
+  `standalone` çıktısı etkinleştirildi.
+- `DEPLOY.md`: Cloud SQL örneği, Secret Manager, Artifact Registry, Cloud Run
+  dağıtımı, migration, Google OAuth ve özel alan adı adımları.
+- `public/favicon.svg` ve tarayıcı sekmesi ikonu.

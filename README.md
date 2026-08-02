@@ -192,6 +192,10 @@ aşamada `core/auth/mailer.ts` içine gerçek bir e-posta sağlayıcısı bağla
 
 ## Üretim: Google Cloud SQL
 
+> **Baştan sona kurulum rehberi için [DEPLOY.md](./DEPLOY.md) dosyasına bakın.**
+> Orada Cloud SQL örneği oluşturma, Secret Manager, imaj derleme, Cloud Run
+> dağıtımı, migration ve Google OAuth adımları komut komut anlatılmıştır.
+
 ### 1) Cloud Run / App Engine — Unix soketi (önerilen)
 
 Cloud SQL örneğini servise bağladıktan sonra:

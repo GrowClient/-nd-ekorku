@@ -33,6 +33,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Cloud Run / Docker için küçük, kendi kendine yeten çıktı.
+  output: "standalone",
   // Derleme izlerinin proje kökünden çıkmasını engeller.
   outputFileTracingRoot: import.meta.dirname,
   async headers() {

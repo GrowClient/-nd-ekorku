@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "Modüler, çok kiracılı SaaS ERP altyapısı. Sektörünüze göre açıp kapatabileceğiniz modüller.",
   robots: { index: false, follow: false },
+  icons: { icon: "/favicon.svg" },
 };
 
 export const viewport: Viewport = {

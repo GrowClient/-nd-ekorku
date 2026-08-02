@@ -1,0 +1,20 @@
+node_modules
+.next
+.git
+.github
+npm-debug.log*
+Dockerfile
+.dockerignore
+README.md
+CHANGELOG.md
+DEPLOY.md
+
+# Gizli bilgiler asla imaja girmez
+.env
+.env.*
+!.env.example
+
+coverage
+.vscode
+.idea
+*.log
