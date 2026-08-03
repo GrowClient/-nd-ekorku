@@ -379,6 +379,80 @@ const Doku = (() => {
     return dokuYap(c, 1, 1);
   }
 
+
+  /* ── KAYIP ÇOCUK: ten, gömlek, şort, saç ─────────────────────────────
+     Referans tasarım: soluk, kirli, çukur gözlü bir çocuk. Ten kadavra
+     grisine çalıyor, üstünde lekeler ve damar izleri var; gömlek eskimiş
+     ham keten, şort koyu ve çamurlu.                                      */
+  function cocukTeni() {
+    const { c, x } = tuval(256, 256);
+    const r = rastgele(101);
+    x.fillStyle = '#b9b2a4'; x.fillRect(0, 0, 256, 256);
+    // ten altı soğuk lekelenme
+    lekeler(x, 256, 256, 26, '138,140,146', 14, 62, 0.30, 5);
+    lekeler(x, 256, 256, 18, '164,158,146', 10, 44, 0.28, 11);
+    // kir: dizler, eller, ayaklar hep kirli
+    lekeler(x, 256, 256, 34, '58,48,36', 6, 34, 0.34, 19);
+    lekeler(x, 256, 256, 12, '32,26,20', 4, 18, 0.42, 29);
+    // ince damar izleri
+    x.globalAlpha = .17;
+    for (let i = 0; i < 46; i++) {
+      x.strokeStyle = i % 3 ? '#5d6272' : '#6b5a52';
+      x.lineWidth = .6 + r() * .9;
+      let px = r() * 256, py = r() * 256;
+      x.beginPath(); x.moveTo(px, py);
+      for (let j = 0; j < 4; j++) {
+        px += (r() - .5) * 34; py += (r() - .5) * 34;
+        x.lineTo(px, py);
+      }
+      x.stroke();
+    }
+    x.globalAlpha = 1;
+    gren(x, 256, 256, 15, 41);
+    return dokuYap(c, 1, 1);
+  }
+
+  function cocukGomlegi() {
+    const { c, x } = tuval(256, 256);
+    const r = rastgele(211);
+    x.fillStyle = '#a99e88'; x.fillRect(0, 0, 256, 256);
+    // keten dokusu
+    for (let i = 0; i < 256; i += 2) {
+      x.strokeStyle = `rgba(255,250,235,${.05 + r() * .05})`;
+      x.beginPath(); x.moveTo(0, i); x.lineTo(256, i); x.stroke();
+      x.strokeStyle = `rgba(60,52,40,${.05 + r() * .06})`;
+      x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 256); x.stroke();
+    }
+    // yıllanmış kir ve küf
+    lekeler(x, 256, 256, 30, '76,62,42', 10, 52, 0.34, 7);
+    lekeler(x, 256, 256, 16, '44,44,34', 8, 30, 0.40, 23);
+    lekeler(x, 256, 256, 10, '112,96,64', 16, 60, 0.22, 37);
+    // yıpranma: kopuk iplikler
+    x.globalAlpha = .3;
+    for (let i = 0; i < 70; i++) {
+      x.strokeStyle = '#4a4032'; x.lineWidth = .7;
+      const px = r() * 256, py = r() * 256;
+      x.beginPath(); x.moveTo(px, py); x.lineTo(px + (r() - .5) * 16, py + (r() - .5) * 16); x.stroke();
+    }
+    x.globalAlpha = 1;
+    gren(x, 256, 256, 13, 53);
+    return dokuYap(c, 1, 1);
+  }
+
+  function cocukSortu() {
+    const { c, x } = tuval(256, 256);
+    const r = rastgele(307);
+    x.fillStyle = '#3b332a'; x.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 256; i += 3) {
+      x.strokeStyle = `rgba(150,136,110,${.04 + r() * .05})`;
+      x.beginPath(); x.moveTo(0, i); x.lineTo(256, i); x.stroke();
+    }
+    lekeler(x, 256, 256, 26, '20,16,12', 10, 48, 0.45, 13);
+    lekeler(x, 256, 256, 14, '84,70,48', 8, 34, 0.26, 61);
+    gren(x, 256, 256, 12, 67);
+    return dokuYap(c, 1, 1);
+  }
+
   /* ── Tavan ───────────────────────────────────────────────────────────── */
   function tavan() {
     const { c, x } = tuval(256, 256);
@@ -440,5 +514,6 @@ const Doku = (() => {
     return dokuYap(c, 1, 1);
   }
 
-  return { ahsapDoseme, duvarKagidi, siva, ahsap, tas, karo, hali, kagit, kumas, tavan, bumpGurultu, eskiFotograf };
+  return { ahsapDoseme, duvarKagidi, siva, ahsap, tas, karo, hali, kagit, kumas, tavan, bumpGurultu, eskiFotograf,
+           cocukTeni, cocukGomlegi, cocukSortu };
 })();

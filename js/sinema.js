@@ -75,10 +75,16 @@ const Sinema = {
   /* karanlıkta duran bir insan silueti (varlık gövdesinden türetilir) */
   siluet(x, y, z, olcek = 1, bakYaw = 0) {
     const g = Varlik.mesh.clone(true);
+    // Gövde artık dokulu bir düzlem: malzemeyi tamamen değiştirirsek
+    // silüet dolu bir dikdörtgene dönüşür. Onun yerine kopyalayıp
+    // karartıyoruz; alfa kesimi (alphaTest) böylece korunuyor.
     g.traverse(o => {
-      if (o.isMesh) o.material = new THREE.MeshStandardMaterial({
-        color: 0x1b1c22, roughness: 1, transparent: true, opacity: .95, depthWrite: false,
-      });
+      if (!o.isMesh) return;
+      const m = o.material.clone();
+      m.color = new THREE.Color(0x2a2b33);
+      m.emissive = new THREE.Color(0x05050a);
+      m.opacity = .97;
+      o.material = m;
     });
     g.scale.setScalar(olcek);
     g.position.set(x, y, z);

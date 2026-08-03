@@ -21,58 +21,24 @@ const Varlik = {
   yakinlik: 0,          // 0..1 — ekran efekti için
   ekranSag: 0,          // -1 sol, +1 sağ, 0 arkada
   kalpSayaci: 0,
-  gozKirp: 2, gozKapali: 0,
   adimSayaci: 0,
   isin: new THREE.Raycaster(),
 
   kur(sahne) {
-    const g = new THREE.Group();
-    // fenerde belli belirsiz seçilecek kadar açık, gölgede siluet kalacak
-    // kadar koyu — tam siyah yaparsan hiç görünmüyor.
-    // Fenerde net seçilecek kadar açık, gölgede siluet kalacak kadar koyu.
-    // Önceki değerler o kadar koyuydu ki karanlıkta hiç görünmüyordu.
-    const mal = new THREE.MeshStandardMaterial({
-      color: 0x4a4a56, roughness: .94, metalness: 0,
-      emissive: 0x1b1c26, emissiveIntensity: 1,
-      transparent: true, opacity: 0, depthWrite: false,
-    });
-    const ek = (en, yuk, boy, y, z = 0) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(en, yuk, boy), mal);
-      m.position.set(0, y, z);
-      g.add(m);
-    };
-    ek(.30, .52, .18, .74);                    // gövde
-    ek(.20, .16, .18, 1.06);                   // omuz/boyun
-    const kafa = new THREE.Mesh(new THREE.SphereGeometry(.115, 12, 10), mal);
-    kafa.position.y = 1.20; g.add(kafa);
-    ek(.075, .44, .075, .74, 0);                // kollar
-    g.children[g.children.length - 1].position.x = -.19;
-    ek(.075, .44, .075, .74, 0);
-    g.children[g.children.length - 1].position.x = .19;
-    ek(.10, .48, .10, .24, 0);
-    g.children[g.children.length - 1].position.x = -.08;
-    ek(.10, .48, .10, .24, 0);
-    g.children[g.children.length - 1].position.x = .08;
-
-    // Gözler: karanlıkta seçilebilen tek şey. Fener olmadan da fark edilsin
-    // diye kendi ışığını veren küçük iki küre.
-    const gozMal = new THREE.MeshBasicMaterial({
-      color: 0xd8cfc0, transparent: true, opacity: 0, depthWrite: false,
-    });
-    const gozler = [];
-    for (const dx of [-.045, .045]) {
-      const gz = new THREE.Mesh(new THREE.SphereGeometry(.021, 8, 6), gozMal);
-      gz.position.set(dx, 1.215, -.095);
-      g.add(gz); gozler.push(gz);
-    }
-
+    const y = Cocuk.yap();
+    const g = y.grup;
     g.visible = false;
     sahne.add(g);
     this.mesh = g;
-    this.malzeme = mal;
-    this.gozMalzeme = gozMal;
-    this.gozler = gozler;
+    this.govde = y;
+    this.malzemeler = y.malzemeler;
+    this.malzeme = y.malzemeler[0];
     this.sahne = sahne;
+  },
+
+  /* Belirme/silinme: bütün parçalar birlikte sürülür */
+  saydamlikSur(deger) {
+    for (const m of this.malzemeler) m.opacity = deger;
   },
 
   etkinlestir() {
@@ -127,7 +93,8 @@ const Varlik = {
     const kes = this.isin.intersectObjects(this.sahne.children, true);
     for (const v of kes) {
       if (!v.object.isMesh || !v.object.visible) continue;
-      if (v.object.material === this.malzeme || v.object.material === M.cam) continue;
+      if (this.malzemeler.includes(v.object.material) || v.object.material === M.cam)
+        continue;                                    // kendi gövdesi engel sayılmaz
       return false;                                                    // arada engel var
     }
     return true;
@@ -259,15 +226,13 @@ const Varlik = {
 
     if (this.durum !== 'cekiliyor')
       this.saydam = Math.min(1, this.saydam + dt * 1.2);
-    this.malzeme.opacity = this.saydam * .93;
-    // gözler kırpışır — hareketsiz duran bir şeyin fark edilmesini sağlar
-    this.gozKirp -= dt;
-    if (this.gozKirp <= 0) { this.gozKirp = .9 + Math.random() * 3.4; this.gozKapali = .13; }
-    this.gozKapali = Math.max(0, this.gozKapali - dt);
-    this.gozMalzeme.opacity = this.gozKapali > 0 ? 0 : this.saydam * .95;
+    this.saydamlikSur(this.saydam * .96);
+    // Çekilirken sırtını dönüyor: sprite sayfasındaki arka görünüşe geç.
+    this.govde.kareSec(this.durum === 'cekiliyor' ? 1 : 0);
 
     // duruş: her zaman oyuncuya dönük ama başı hafif eğik
     this.mesh.position.copy(this.poz);
+    // Billboard: düzlemin ön yüzü yerel +Z'ye bakar, oyuncuya çevir.
     this.mesh.rotation.y = Math.atan2(Oyuncu.poz.x - this.poz.x, Oyuncu.poz.z - this.poz.z);
     this.mesh.visible = this.saydam > .02;
 
