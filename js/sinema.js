@@ -48,7 +48,10 @@ const Sinema = {
       if (p.yazi) this.yaziEl.classList.add('gor');
     }, 420);
     if (p.baslarken) p.baslarken();
-    if (p.seslendir && p.yazi) setTimeout(() => Konusma.soyle(p.yazi, { hiz: .9 }), 700);
+    // Ara sahneler artık varsayılan olarak seslendirilir. Bu Deniz'in
+    // iç sesi: kırılgan ton. Plan kendi tonunu belirtebilir.
+    if (p.seslendir !== false && p.yazi)
+      setTimeout(() => Konusma.soyle(p.yazi, { ton: p.ton || 'kirilgan' }), 700);
   },
 
   atla() {

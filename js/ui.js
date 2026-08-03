@@ -226,7 +226,7 @@ const Arayuz = {
     e.querySelector('.metin').textContent = m.metin;
     e.classList.add('gor');
     Ses.telefon();
-    setTimeout(() => Konusma.soyle(m.metin), 900);
+    setTimeout(() => Konusma.soyle(m.metin, { ton: m.ton || 'duz' }), 900);
     clearTimeout(this._mesZ);
     this._mesZ = setTimeout(() => e.classList.remove('gor'), 13000);
   },
@@ -400,14 +400,25 @@ const Arayuz = {
     const haneler = [0, 1, 2, 3].map(i =>
       '<span class="hane' + (i === this.kilitGiris.length ? ' etkin' : '') + '">' +
       (this.kilitGiris[i] || '·') + '</span>').join('');
+    // Deftere düşmüş tarihler — şifre buradan çıkar, ezberden değil.
+    const tarihler = (Durum.tarihler || []);
+    const tarihBlok = tarihler.length
+      ? '<div class="tarihKutu"><div class="tarihBaslik">defterindeki tarihler</div>' +
+        tarihler.map(t => '<div class="tarihSatir"><b>' + t.ad + '</b>' + t.not + '</div>').join('') +
+        '</div>'
+      : '<div class="tarihKutu bos">Defterinde henüz tarih yok. Evdeki tarihli şeylere bak: '
+        + 'duran saat, pervazdaki boy çizelgesi, zarflar, evraklar.</div>';
+
     this.el.kilitKart.innerHTML =
-      '<div class="ustBilgi">Kilitli</div>' +
+      '<div class="ustBilgi">Kilitli' + (this.kilitDeneme ? ' · ' + this.kilitDeneme + ' yanlış deneme' : '') + '</div>' +
       '<h2 class="baslik">' + k.baslik + '</h2>' +
       '<div class="katalog">' + k.altyazi + '</div>' +
       '<div class="kadran">' + haneler + '</div>' +
       '<div class="kilitMesaj">' + (mesaj || '') + '</div>' +
-      '<div class="beat ses" style="margin-top:22px">' + k.ipucu +
-      (this.kilitDeneme >= 2 && k.ipucu2 ? '<br><br><span style="color:#c2b79c">' + k.ipucu2 + '</span>' : '') + '</div>' +
+      '<div class="beat ses" style="margin-top:18px">' + k.ipucu +
+      (this.kilitDeneme >= 1 && k.ipucu2 ? '<br><br><span style="color:#c2b79c">' + k.ipucu2 + '</span>' : '') +
+      (this.kilitDeneme >= 3 && k.ipucu3 ? '<br><br><span style="color:#d8c48f">' + k.ipucu3 + '</span>' : '') + '</div>' +
+      tarihBlok +
       '<div class="altBilgi"><span>rakam tuşlarıyla gir</span>' +
       '<span><span class="tus">ENTER</span> dene &nbsp; <span class="tus">ESC</span> vazgeç</span></div>';
   },

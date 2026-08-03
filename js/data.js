@@ -24,6 +24,7 @@ const ESYALAR = {
 
   saat: {
     ad: 'Sarkaçlı Duvar Saati',
+    tarihNotu: 'Duvar saati 11:01\'de durmuş. Saat değil, tarih gibi duruyor: 11 — 01.',
     oda: 'Antre',
     katalog: 'Ceviz kasa, sarkaçlı duvar saati, yaklaşık 1950. Sarkaç hareketsiz. Akrep ve yelkovan 11:01\'de durmuş. Kurma anahtarı bulunamadı.',
     beats: [
@@ -129,6 +130,7 @@ const ESYALAR = {
 
   cizelge: {
     ad: 'Kapı Pervazındaki Boy Çizelgesi',
+    tarihNotu: 'Pervazdaki son çizgi: 11 Ocak 1999. Kalem tahtaya oyulacak kadar bastırılmış.',
     oda: 'Mutfak',
     katalog: 'Mutfak kapısı pervazı. Kurşun kalemle çizilmiş yatay çizgiler, tarihli. İki ayrı sütun hâlinde.',
     beats: [
@@ -317,6 +319,7 @@ const ESYALAR = {
 
   mektuplar_iade: {
     ad: 'İade Edilmiş Mektuplar',
+    tarihNotu: 'Zarf damgaları yılda iki güne yığılmış. Biri 11 Ocak. Ötekinin mürekkebi dağılmış — o günü başka bir yerde bulmam lazım.',
     oda: 'Anneannenin Odası',
     katalog: 'Komodin çekmecesinde lastikle bağlanmış yaklaşık kırk zarf. Hiçbiri açılmamış.',
     beats: [
@@ -375,6 +378,7 @@ const ESYALAR = {
   },
 
   evraklar: {
+    tarihNotu: 'Yuva çıkış evrakı: UMUT — Doğum 02.03.1993. Yani 2 Mart.',
     ad: 'Metal Evrak Kutusu',
     oda: 'Tavan Arası',
     katalog: 'Kilitsiz metal evrak kutusu. Resmî belgeler, iki nüfus kaydı fotokopisi, bir dosya, bir dilekçe.',
@@ -427,31 +431,31 @@ const ESYALAR = {
 /* ══════════════════════ ANNENİN SESLİ MESAJLARI ═════════════════════════ */
 
 const MESAJLAR = [
-  { id:'m1', kosul: (d)=> d.sayac >= 1,
+  { id:'m1', ton:'duz', kosul: (d)=> d.sayac >= 1,
     baslik:'Annem — sesli mesaj (0:22)',
     metin:'"Deniz, vardın mı? Anahtar kapının yanındaki taşın altındaydı. Listeyi tut, her odayı yaz, fotoğraf çekme uğraşma. Bir de — üst kata çıkmana gerek yok. Orada bir şey kalmadı."' },
 
-  { id:'m2', kosul: (d)=> d.sayac >= 5,
+  { id:'m2', ton:'soguk', kosul: (d)=> d.sayac >= 5,
     baslik:'Annem — sesli mesaj (0:14)',
     metin:'"Çok oyalanma. O ev insanı yorar, ben bilirim. Anneannen son yıllarda... neyse. Yazdıklarını bana yolla, ben Orhan\'a iletirim, o halleder."' },
 
-  { id:'m3', kosul: (d)=> d.bayrak.f_cizelge,
+  { id:'m3', ton:'endiseli', kosul: (d)=> d.bayrak.f_cizelge,
     baslik:'Annem — cevapsız çağrı ×4',
     metin:'"Aradım açmadın. Neden açmıyorsun? Deniz, oradaki eşyaların hepsi çöp. Uğraşma. Yarın Orhan kamyonla gelir, hepsini birden alır."' },
 
-  { id:'m4', kosul: (d)=> d.ustKat || d.bayrak.f_pamuk || d.bayrak.f_duvar,
+  { id:'m4', ton:'endiseli', kosul: (d)=> d.ustKat || d.bayrak.f_pamuk || d.bayrak.f_duvar,
     baslik:'Annem — sesli mesaj (0:31)',
     metin:'"Neredesin? Üst kata mı çıktın? ... Deniz, o oda kapalıydı. O odanın kapalı olması gerekiyordu. Kapat ve aşağı in."' },
 
-  { id:'m5', kosul: (d)=> d.bayrak.f_album || d.bayrak.f_gazete,
+  { id:'m5', ton:'kizgin', kosul: (d)=> d.bayrak.f_album || d.bayrak.f_gazete,
     baslik:'Annem — sesli mesaj (0:47)',
     metin:'"Beni dinle. Ne bulduysan yerine koy. Onlar seni ilgilendirmez, hiçbiri seni ilgilendirmez. Sen benim çocuğumsun. Bunu bir kere söylüyorum ve bir daha söylemeyeceğim: SEN BENİM ÇOCUĞUMSUN."' },
 
-  { id:'m6', kosul: (d)=> d.bayrak.f_evrak,
+  { id:'m6', ton:'soguk', kosul: (d)=> d.bayrak.f_evrak,
     baslik:'Annem — sesli mesaj (0:41)',
     metin:'İçinde konuşma yok. Kırk bir saniye boyunca sadece nefes sesi. Sonunda bir araba kapısı kapanıyor.' },
 
-  { id:'m7', kosul: (d)=> d.bayrak.f_sandik,
+  { id:'m7', ton:'soguk', kosul: (d)=> d.bayrak.f_sandik,
     baslik:'Annem — mesaj',
     metin:'"Yoldayım."' },
 ];
@@ -565,6 +569,7 @@ const KILITLER = {
     altyazi: 'Kapakta dört haneli pirinç kadran. Rakamlar aşınmış — bu kilit çok açılmış.',
     ipucu: 'Bu evde bir tarih her yerde tekrar ediyor: duran saatte, pervazdaki son çizgide, saç lülesinin kâğıdında.',
     ipucu2: 'Saat 11:01\'de durmuş. Pervazdaki son çizgi 11 Ocak 1999. Saç lülesinin kâğıdında da aynı gün. Gün, sonra ay.',
+    ipucu3: 'Gün 11, ay Ocak. Dört hane: önce günün iki hanesi, sonra ayın iki hanesi.',
     acilinca: 'Kadran yerine oturuyor. Kapak, sanki yıllardır bunu bekliyormuş gibi kolayca kalkıyor.',
     yanlis: 'Kadran boşa dönüyor. Yanlış.',
   },
@@ -574,6 +579,7 @@ const KILITLER = {
     altyazi: 'Dört haneli çevirmeli asma kilit. Dışarıdan takılmış.',
     ipucu: 'Bu kilit 11 Ocak değil — o tarih zaten evin her yerinde, saklamaya değmez. Anneannem başka bir gün seçmiş: yılda iki kez zarf yazdığı öteki gün. Gün, sonra ay.',
     ipucu2: 'Anneannenin odasındaki iade mektuplara bak. Kırk zarf, iki ayrı tarih. Biri 11 Ocak. Diğerini arıyorsun.',
+    ipucu3: 'Aradığın gün, evraklardaki çocuğun doğum günü. UMUT — 02.03.1993. Gün, sonra ay.',
     acilinca: 'Kilit açılıyor. Elimde ağır ve soğuk duruyor. Bu tarihi onun seçmiş olması bir şey anlatıyor ama henüz ne olduğunu bilmiyorum.',
     yanlis: 'Klik. Açılmadı.',
   },
@@ -653,6 +659,12 @@ const SAHNELER = {
     { baslangic: [7.2, -1.30, 4.95], bitis: [7.2, -0.60, 5.60],
       bak: [7.20, -2.45, 4.30], bakBitis: [7.20, -0.50, 2.20], sure: 6.0, fener: 7.0,
       yazi: 'Sarnıcın taşını açtırdım. İçi boştu. Zaten yıllardır boştu. Ama artık kapalı da değil.' },
+    { baslangic: [4.4, -1.05, 5.60], bitis: [1.9, -1.05, 5.30],
+      bak: [1.80, -1.85, 5.20], sure: 6.0, fener: 5.5, ton: 'soguk',
+      yazi: 'Annem kapıda bekledi. İçeri girmedi. Kırk dakika sonra arabaya bindi ve gitti; bir kez bile arkasına bakmadı.' },
+    { baslangic: [7.5, 1.68, 10.2], bitis: [7.5, 1.68, 11.5],
+      bak: [7.50, 1.55, 12.0], sure: 7.0, fener: 4.0, ton: 'kirilgan',
+      yazi: 'Mezar taşına iki isim yazdırdım. Üstte benimki değil. Otuz üç yıl sonra ilk kez, bir çocuğun adı yazılı bir yer var bu dünyada.' },
   ],
 
   son_imzala: [
@@ -665,6 +677,12 @@ const SAHNELER = {
     { baslangic: [7.5, 1.68, 9.6], bitis: [7.5, 1.68, 11.4],
       bak: [7.50, 1.60, 12.0], sure: 5.5, fener: 5.0,
       yazi: 'Ev üç ay sonra satıldı. Alıcı bahçeyi düzledi, sarnıcın üstüne beton döktü.' },
+    { baslangic: [11.6, 1.62, 2.5], bitis: [10.2, 1.62, 2.5],
+      bak: [7.10, 1.30, 4.50], sure: 6.0, fener: 4.5, ton: 'soguk',
+      yazi: 'Annem her pazar arıyor. Konuşuyoruz. Hava, iş, trafik. Yirmi dakika, hiç aksatmadan, bir daha hiçbir şey sormadan.' },
+    { baslangic: [7.5, 4.82, 5.0], bitis: [7.5, 4.82, 3.2],
+      bak: [9.40, 4.90, 3.05], sure: 7.0, fener: 3.5, ton: 'kirilgan',
+      yazi: 'Bazen gece uyanıyorum ve adımı hatırlamak için birkaç saniye düşünmem gerekiyor. Sonra hatırlıyorum. Sonra tekrar uyuyorum.' },
   ],
 
   son_yetisemedin: [
@@ -678,6 +696,13 @@ const SAHNELER = {
     { baslangic: [6.5, 2.30, 6.6], bitis: [6.9, 1.85, 7.9],
       bak: [7.40, 0.95, 9.20], sure: 6.0, fener: 8.5,
       yazi: 'Elini uzatıyor. Ben veriyorum. Otuz üç yıldır bana bir şey uzatıldığında almayı öğrenmişim — ve verilmesi gerektiğinde vermeyi.' },
+    { baslangic: [7.6, 1.70, 9.8], bitis: [7.9, 1.70, 11.0],
+      bak: [7.60, 1.55, 11.9], sure: 6.0, fener: 2.5, ton: 'endiseli',
+      yazi: 'Kapıyı o kapattı. Ben çıkarken elimde hiçbir şey yoktu. Bir soru bile.',
+      baslarken: () => Sinema.siluet(7.5, 0, 10.4, 1.34, 0) },
+    { baslangic: [7.5, 1.66, 11.2], bitis: [7.5, 1.66, 10.4],
+      bak: [5.70, 1.90, 9.60], sure: 7.0, fener: 3.0, ton: 'soguk',
+      yazi: 'Saat hâlâ 11:01. Kimse kurmadı. Kimse kurmayacak. Ve ben o gece ne bulduğumu ertesi sabah unutmuştum.' },
   ],
 };
 
@@ -756,6 +781,7 @@ Object.assign(ESYALAR, {
 
   asi_karti: {
     ad: 'Aşı Kartı',
+    tarihNotu: 'Aşı kartı: DENİZ AYDIN — Doğum 14.03.1993. İlk kayıt Kasım 1999.',
     oda: 'Tavan Arası',
     katalog: 'Plastik kılıf içinde sararmış aşı kartı. Ad hanesi doldurulmuş, tarih hanelerinin ilk yarısı boş.',
     kisa: 'Aşı kartındaki ilk kayıt Kasım 1999 — altı yaşında. Öncesindeki bütün yıllar boş.',

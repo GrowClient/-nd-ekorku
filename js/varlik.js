@@ -21,15 +21,19 @@ const Varlik = {
   yakinlik: 0,          // 0..1 — ekran efekti için
   ekranSag: 0,          // -1 sol, +1 sağ, 0 arkada
   kalpSayaci: 0,
+  gozKirp: 2, gozKapali: 0,
+  adimSayaci: 0,
   isin: new THREE.Raycaster(),
 
   kur(sahne) {
     const g = new THREE.Group();
     // fenerde belli belirsiz seçilecek kadar açık, gölgede siluet kalacak
     // kadar koyu — tam siyah yaparsan hiç görünmüyor.
+    // Fenerde net seçilecek kadar açık, gölgede siluet kalacak kadar koyu.
+    // Önceki değerler o kadar koyuydu ki karanlıkta hiç görünmüyordu.
     const mal = new THREE.MeshStandardMaterial({
-      color: 0x24242b, roughness: .97, metalness: 0,
-      emissive: 0x090a10, emissiveIntensity: 1,
+      color: 0x4a4a56, roughness: .94, metalness: 0,
+      emissive: 0x1b1c26, emissiveIntensity: 1,
       transparent: true, opacity: 0, depthWrite: false,
     });
     const ek = (en, yuk, boy, y, z = 0) => {
@@ -50,10 +54,24 @@ const Varlik = {
     ek(.10, .48, .10, .24, 0);
     g.children[g.children.length - 1].position.x = .08;
 
+    // Gözler: karanlıkta seçilebilen tek şey. Fener olmadan da fark edilsin
+    // diye kendi ışığını veren küçük iki küre.
+    const gozMal = new THREE.MeshBasicMaterial({
+      color: 0xd8cfc0, transparent: true, opacity: 0, depthWrite: false,
+    });
+    const gozler = [];
+    for (const dx of [-.045, .045]) {
+      const gz = new THREE.Mesh(new THREE.SphereGeometry(.021, 8, 6), gozMal);
+      gz.position.set(dx, 1.215, -.095);
+      g.add(gz); gozler.push(gz);
+    }
+
     g.visible = false;
     sahne.add(g);
     this.mesh = g;
     this.malzeme = mal;
+    this.gozMalzeme = gozMal;
+    this.gozler = gozler;
     this.sahne = sahne;
   },
 
@@ -138,7 +156,7 @@ const Varlik = {
   yakala() {
     this.yakalanmaSayisi++;
     Ses.korku(); Ses.kalp(1.6);
-    Durum.karartma = 1;
+    Korku.bas(1000);                     // ekranı kaplayan yüz + çığlık
     this.yakinlik = 0;
     this.durum = 'uyku';
     this.bekleme = 55;
@@ -152,13 +170,14 @@ const Varlik = {
       if (k.distanceTo(this.poz) > 4.5) { hedef = k; break; }
     }
     if (!hedef) hedef = this.ekmekKirintisi[0] || new THREE.Vector3(7.5, 0, 10.5);
+    setTimeout(() => { Durum.karartma = 1; }, 820);
     setTimeout(() => {
       Oyuncu.poz.copy(hedef);
       Oyuncu.hiz.set(0, 0, 0);
       this.ekmekKirintisi.length = 0;
       Durum.karartma = 0;
       Arayuz.fisilti(YAKALANDI[this.yakalanmaSayisi % YAKALANDI.length]);
-    }, 1100);
+    }, 1700);
   },
 
   /* Ekran efekti: ne kadar yakın ve hangi yanda */
@@ -241,6 +260,11 @@ const Varlik = {
     if (this.durum !== 'cekiliyor')
       this.saydam = Math.min(1, this.saydam + dt * 1.2);
     this.malzeme.opacity = this.saydam * .93;
+    // gözler kırpışır — hareketsiz duran bir şeyin fark edilmesini sağlar
+    this.gozKirp -= dt;
+    if (this.gozKirp <= 0) { this.gozKirp = .9 + Math.random() * 3.4; this.gozKapali = .13; }
+    this.gozKapali = Math.max(0, this.gozKapali - dt);
+    this.gozMalzeme.opacity = this.gozKapali > 0 ? 0 : this.saydam * .95;
 
     // duruş: her zaman oyuncuya dönük ama başı hafif eğik
     this.mesh.position.copy(this.poz);
@@ -254,7 +278,18 @@ const Varlik = {
       let c = 1 - yakinOran * .18;
       if (Math.random() < .09) c *= .74;                  // kısa kırpışma
       Oyuncu.fenerCarpan = Math.max(.66, c);
-      if (Math.random() < .012) Ses.adim('ahsap');
+    }
+
+    // Ayak sesi: yaklaştıkça sıklaşır. Görünmediği anlarda bile
+    // nereden geldiğini duyabilmen gerekiyor.
+    if (this.durum === 'yaklasiyor' && mesafe < 13) {
+      this.adimSayaci -= dt;
+      if (this.adimSayaci <= 0) {
+        this.adimSayaci = .62 + mesafe * .055;
+        const uzaklikGucu = Math.max(.16, 1 - mesafe / 13);
+        Ses.adim(Oyuncu.poz.y < -1 ? 'tas' : 'ahsap', uzaklikGucu);
+        if (mesafe < 5.5 && Math.random() < .3) Ses.gicirti(.25 * uzaklikGucu);
+      }
     }
   },
 };

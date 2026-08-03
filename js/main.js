@@ -42,6 +42,7 @@
     Oyuncu.kur(kamera, tuval);
     Konusma.kur();
     Sinema.kur(sahne, kamera);
+    Korku.kur();
     Efekt.kur(renderer, innerWidth, innerHeight);
     Arayuz.kur();
     Arayuz.girisMetni();
@@ -131,9 +132,11 @@
 
     if (h.kapiId) {
       const k = Ev.kapilar[h.kapiId];
-      if (k && !k.acik) {
-        const varMi = Durum.anahtarVar(k.anahtar);
-        Arayuz.ipucuGoster(varMi
+      if (k) {
+        if (k.hedefAci !== undefined) { Arayuz.ipucuGizle(); return; }
+        if (k.sabit) { Arayuz.ipucuGoster('<b>E</b> sokak kapısı'); return; }
+        if (k.acik) { Arayuz.ipucuGoster('<b>E</b> kapıyı kapat'); return; }
+        Arayuz.ipucuGoster(!k.kilitli || Durum.anahtarVar(k.anahtar)
           ? '<b>E</b> kapıyı aç'
           : '<b>E</b> <span class="kilit">kilitli — anahtar gerek</span>');
         return;
@@ -155,22 +158,38 @@
     const h = bakilan();
     if (!h) return;
 
-    /* kilitli kapı */
+    /* kapılar: aç / kapat */
     if (h.kapiId) {
       const k = Ev.kapilar[h.kapiId];
-      if (k && !k.acik) {
-        if (Durum.anahtarVar(k.anahtar)) {
-          Ev.kapiAc(h.kapiId);
-          Ses.gicirti(1);
-          Arayuz.bildirim('KİLİT AÇILDI');
-          if (h.kapiId === 'sandikodasi')
-            Arayuz.fisilti('Kapı içeri doğru açılıyor. Yukarıdan toz iniyor — merdiven var, ve merdiven kullanılmış.');
-        } else {
+      if (k) {
+        if (k.hedefAci !== undefined) return;              // hâlâ hareket ediyor
+        if (k.sabit) {
           Ses.tik();
+          Arayuz.fisilti('Sokak kapısı. Dışarı çıkmayacağım — henüz değil.');
+          return;
+        }
+        if (k.acik) {
+          if (Ev.kapidaMi(h.kapiId, Oyuncu.poz.x, Oyuncu.poz.z)) {
+            Arayuz.fisilti('Aralıkta duruyorum. Kenara çekilmem lazım.');
+            return;
+          }
+          Ev.kapiKapat(h.kapiId);
+          Ses.kapiGicirti(2.0, .8);
+          return;
+        }
+        if (k.kilitli && !Durum.anahtarVar(k.anahtar)) {
+          Ses.kapiTokmak();
           Arayuz.fisilti(h.kapiId === 'sandikodasi'
             ? 'Kilitli. Anneannem bu odanın anahtarını yanında taşımış olmalı.'
             : 'Kilitli.');
+          return;
         }
+        const kilitliydi = k.kilitli;
+        Ev.kapiAc(h.kapiId);
+        Ses.kapiGicirti(2.2, 1);
+        if (kilitliydi) Arayuz.bildirim('KİLİT AÇILDI');
+        if (h.kapiId === 'sandikodasi')
+          Arayuz.fisilti('Kapı içeri doğru açılıyor. Yukarıdan toz iniyor — merdiven var, ve merdiven kullanılmış.');
         return;
       }
     }
@@ -188,14 +207,22 @@
     if (vurguluNesne) { vurgula(vurguluNesne, false); vurguluNesne = null; }
   }
 
-  /* ── kapı animasyonu ────────────────────────────────────────────── */
+  /* ── kapı animasyonu: sabit hızda, ağır, gıcırdayarak ─────────────
+     Fizik dt'si .05'te kırpılıyor; kapı onunla sürülürse düşük kare
+     hızında ağır çekim oluyor. Gerçek geçen süreyle sürülüyor.        */
   function kapilariGuncelle(dt) {
     for (const id in Ev.kapilar) {
       const k = Ev.kapilar[id];
       if (k.hedefAci === undefined) continue;
       const f = k.hedefAci - k.grup.rotation.y;
-      if (Math.abs(f) < .002) { k.hedefAci = undefined; continue; }
-      k.grup.rotation.y += f * Math.min(1, 1.6 * dt);
+      const adim = .78 * dt;                        // ~2 saniyede tam açılır
+      if (Math.abs(f) <= adim) {
+        k.grup.rotation.y = k.hedefAci;
+        k.hedefAci = undefined;
+        Ses.kapiKilit(k.acik ? .5 : 1);              // mandal sesi
+        continue;
+      }
+      k.grup.rotation.y += Math.sign(f) * adim;
     }
   }
 
@@ -243,7 +270,7 @@
       kamera.rotateX(-.04);
     }
 
-    kapilariGuncelle(dt);
+    kapilariGuncelle(gercekDt);   // sunum: kare hızından bağımsız aksın
     isiklariGuncelle(t);
 
     nabiz += ((Durum.gerilim > .55 ? (Math.sin(t * 2.1) * .5 + .5) * Durum.gerilim : 0) - nabiz) * dt * 2.4;

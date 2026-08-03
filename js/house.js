@@ -187,38 +187,72 @@ const Ev = {
     return h;
   }
 
-  /* Kapı kanadı (+ kilitliyse çarpışma) */
+  /* Kapalı kapının kapladığı hacim — kapı kapalıyken çarpışma olarak durur */
+  function kapiCarpismasi(k) {
+    const yatay = Math.abs(Math.cos(k.yon)) > .5;
+    const cx = k.x + Math.cos(k.yon) * k.en / 2;
+    const cz = k.z - Math.sin(k.yon) * k.en / 2;
+    const dx = yatay ? k.en : .14, dz = yatay ? .14 : k.en;
+    return carp(cx - dx / 2, cx + dx / 2, k.taban, k.taban + 2.05, cz - dz / 2, cz + dz / 2);
+  }
+  /* Kapı ağzının orta noktası — oyuncu aralıkta mı diye bakarken kullanılır */
+  function kapiAgzi(k) {
+    return { x: k.x + Math.cos(k.yon) * k.en / 2, z: k.z - Math.sin(k.yon) * k.en / 2 };
+  }
+
+  /* Kapı kanadı. Hepsi KAPALI başlar, hepsi E ile açılır/kapanır. */
   function kapi(id, x, z, yon, taban, o = {}) {
     const en = o.en || .95;
     const g = P.kapiKanadi(en, 2.05);
     g.position.set(x, taban, z);
-    g.rotation.y = yon + (o.acik || 0);
+    g.rotation.y = yon;
     Ev.sahne.add(g);
-    const kayit = { grup: g, taban, yon, en, acik: !o.kilitli, anahtar: o.anahtar || null, carpisma: null, x, z };
-    if (o.kilitli) {
-      const yatay = Math.abs(Math.cos(yon)) > .5;
-      const cx = x + Math.cos(yon) * en / 2;
-      const cz = z - Math.sin(yon) * en / 2;
-      const dx = yatay ? en : .12, dz = yatay ? .12 : en;
-      kayit.carpisma = carp(cx - dx / 2, cx + dx / 2, taban, taban + 2.05, cz - dz / 2, cz + dz / 2);
-      g.traverse(m => { if (m.isMesh) m.userData.kapi = id; });
-      g.userData.kapi = id;
-      Ev.etkilesimliler.push(g);
-    }
+    const kayit = {
+      id, grup: g, taban, yon, en, x, z,
+      acik: false,
+      kilitli: !!o.kilitli,
+      sabit: !!o.sabit,                       // hiç açılmaz (sokak kapısı)
+      anahtar: o.anahtar || null,
+      acilma: o.acilma ?? -1.62,              // açıkken kanadın döneceği açı farkı
+      carpisma: null, hedefAci: undefined,
+    };
+    kayit.carpisma = kapiCarpismasi(kayit);
+    g.traverse(m => { if (m.isMesh) m.userData.kapi = id; });
+    g.userData.kapi = id;
+    Ev.etkilesimliler.push(g);
     Ev.kapilar[id] = kayit;
     return kayit;
   }
 
   Ev.kapiAc = function (id) {
     const k = Ev.kapilar[id];
-    if (!k || k.acik) return false;
+    if (!k || k.acik || k.sabit) return false;
     k.acik = true;
+    k.kilitli = false;
     if (k.carpisma) {
       const i = Ev.carpismalar.indexOf(k.carpisma);
       if (i >= 0) Ev.carpismalar.splice(i, 1);
+      k.carpisma = null;
     }
-    k.hedefAci = k.yon - 1.15;
+    k.hedefAci = k.yon + k.acilma;
     return true;
+  };
+
+  Ev.kapiKapat = function (id) {
+    const k = Ev.kapilar[id];
+    if (!k || !k.acik || k.sabit) return false;
+    k.acik = false;
+    k.hedefAci = k.yon;
+    if (!k.carpisma) k.carpisma = kapiCarpismasi(k);
+    return true;
+  };
+
+  /* Oyuncu kapı aralığında mı? Aralıktayken kapı kapatılamaz, yoksa sıkışır. */
+  Ev.kapidaMi = function (id, x, z) {
+    const k = Ev.kapilar[id];
+    if (!k) return false;
+    const a = kapiAgzi(k);
+    return Math.hypot(x - a.x, z - a.z) < .95;
   };
 
   function pencere(x, y, z, en, yuk, yatayMi) {
@@ -443,18 +477,18 @@ const Ev = {
     merdiven(3.4, .2, .6, 1.6, KAT.zemin, KAT.bodrum, 'x', 14, null);
 
     /* ---------------- KAPILAR ---------------- */
-    kapi('on', 8.2, 12, Math.PI, KAT.zemin, { acik: -.06 });
+    kapi('on', 8.2, 12, Math.PI, KAT.zemin, { sabit: true });
     carp(6.95, 8.25, KAT.zemin, KAT.zemin + 2.15, 11.82, 12.06);   // ev terk edilemez
-    kapi('mutfak', 5.5, 8.5, Math.PI / 2, KAT.zemin, { acik: -.9 });
-    kapi('salon', 9.5, 8.0, -Math.PI / 2, KAT.zemin, { acik: .85 });
-    kapi('kiler', 1.0, 5, 0, KAT.zemin, { acik: 1.0 });
-    kapi('oturma', 11.0, 5, 0, KAT.zemin, { acik: -1.0 });
-    kapi('oturmaSofa', 9.5, 3.0, -Math.PI / 2, KAT.zemin, { acik: .9 });
-    kapi('bodrum', 3.7, 1.7, 0, KAT.zemin, { kilitli: true, anahtar: 'key_bodrum' });
-    kapi('cocuk', 5.5, 10.0, Math.PI / 2, KAT.ust, { acik: -1.2 });
-    kapi('banyo', 5.5, 1.2, Math.PI / 2, KAT.ust, { acik: -.7 });
-    kapi('anneanne', 9.5, 8.0, -Math.PI / 2, KAT.ust, { acik: .6 });
-    kapi('sandikodasi', 9.5, 1.6, -Math.PI / 2, KAT.ust, { kilitli: true, anahtar: 'key_tavan' });
+    kapi('mutfak', 5.5, 8.5, Math.PI / 2, KAT.zemin, { acilma: -1.62 });
+    kapi('salon', 9.5, 8.0, -Math.PI / 2, KAT.zemin, { acilma: 1.62 });
+    kapi('kiler', 1.0, 5, 0, KAT.zemin, { kilitli: true, anahtar: 'key_kiler', acilma: 1.62 });
+    kapi('oturma', 11.0, 5, 0, KAT.zemin, { acilma: -1.62 });
+    kapi('oturmaSofa', 9.5, 3.0, -Math.PI / 2, KAT.zemin, { acilma: 1.62 });
+    kapi('bodrum', 3.7, 1.7, 0, KAT.zemin, { kilitli: true, anahtar: 'key_bodrum', acilma: -1.62 });
+    kapi('cocuk', 5.5, 10.0, Math.PI / 2, KAT.ust, { acilma: -1.62 });
+    kapi('banyo', 5.5, 1.2, Math.PI / 2, KAT.ust, { acilma: -1.62 });
+    kapi('anneanne', 9.5, 8.0, -Math.PI / 2, KAT.ust, { acilma: 1.62 });
+    kapi('sandikodasi', 9.5, 1.6, -Math.PI / 2, KAT.ust, { kilitli: true, anahtar: 'key_tavan', acilma: 1.62 });
 
     /* ---------------- IŞIKLAR ---------------- */
     function ampulIsigi(x, y, z, renk, guc, mesafe) {
@@ -591,26 +625,38 @@ const Ev = {
     kati(koy(P.koli(.5, .34, .4), 2.1, 0, 2.35, -.4));
     koy(P.koli(.42, .3, .34), 1.5, .44, 2.7, .8);
 
+    /* Not ve asma kilit bodrum kapısının KANADINA bağlanır — sahneye değil.
+       Sahneye bağlıyken kapı açılınca ikisi boşlukta asılı kalıyordu.
+       Kanat grubunun yerel ekseni menteşede: yerel x kanat boyunca,
+       yerel z kanat kalınlığı yönünde.                                    */
+    const bodrumKanat = Ev.kapilar.bodrum.grup;
+
     const not = new THREE.Mesh(G.kutu, M.kagit);
-    not.scale.set(.17, .23, .006); not.position.set(4.2, 1.55, 1.79);
-    S.add(not); etk(not, 'not_orhan');
+    not.scale.set(.17, .23, .006);
+    not.position.set(.5, 1.55, .062);
+    bodrumKanat.add(not); etk(not, 'not_orhan');
 
     const kilit = new THREE.Group();
     kutu(kilit, .13, .16, .05, M.metal, 0, 0, 0);
     silindir(kilit, .045, .045, .1, M.metal, 0, .11, 0);
     kutu(kilit, .34, .09, .04, M.metal, .12, 0, -.02);
-    kilit.position.set(4.42, 1.1, 1.79); S.add(kilit); etk(kilit, 'bodrum_kapisi');
+    kilit.position.set(.72, 1.1, .075);
+    bodrumKanat.add(kilit); etk(kilit, 'bodrum_kapisi');
 
-    /* ---- ÜST KORİDOR ---- */
+    /* ---- ÜST KORİDOR ----
+       Çerçeveler duvarın DOLU parçalarına asılır. x=9.5 duvarında
+       z 1.6–2.6 ve z 8.0–9.0 aralıkları kapı boşluğu; oraya asılan çerçeve
+       havada duruyor gibi görünüyordu.                                   */
     Ev.dinamik.cerceveler = [];
-    [1, 1, 1, 1, 0, 1].forEach((dolu, i) => {
-      const c = dolu ? P.cerceve(.3, .38, M.foto) : P.bosCerceve(.3, .38);
-      c.position.set(9.4, KAT.ust + 1.78, 2.4 + i * 1.5);
-      c.rotation.y = -Math.PI / 2;
-      S.add(c);
-      Ev.dinamik.cerceveler.push(c);
-      etk(c, 'cerceveler');
-    });
+    [[3.05, 1], [4.00, 1], [4.95, 1], [5.90, 1], [6.85, 0], [7.60, 1]]
+      .forEach(([z, dolu]) => {
+        const c = dolu ? P.cerceve(.3, .38, M.foto) : P.bosCerceve(.3, .38);
+        c.position.set(9.4, KAT.ust + 1.72, z);
+        c.rotation.y = -Math.PI / 2;
+        S.add(c);
+        Ev.dinamik.cerceveler.push(c);
+        etk(c, 'cerceveler');
+      });
     kati(koy(P.masa(.7, .36, .8, M.ahsapKoyu), 8.0, KAT.ust, 11.4));
 
     /* ---- ÇOCUK ODASI ---- */
@@ -682,7 +728,7 @@ const Ev = {
     kutu(montG, .13, .3, .13, M.kumasKirmizi, -.21, -.05, 0);
     kutu(montG, .13, .3, .13, M.kumasKirmizi, .21, -.05, 0);
     silindir(montG, .016, .016, .18, M.metal, 0, .3, 0);
-    koy(montG, 14.15, KAT.ust + 1.32, 9.0, -Math.PI / 2); etk(montG, 'mont');
+    koy(montG, 14.06, KAT.ust + 1.32, 9.0, -Math.PI / 2); etk(montG, 'mont');
     yerHalisi(12.3, 8.4, 3.0, 3.0, KAT.ust);
 
     /* ---- SANDIK ODASI ---- */
@@ -729,7 +775,7 @@ const Ev = {
       kutu(parca, .06, 1.05, .5, M.ahsapKoyu, i * .09, .55, 0, .07 + i * .03);
     kutu(parca, .34, .05, .5, M.ahsapKoyu, .15, .04, .1, .3);
     kutu(parca, .12, .1, .09, M.kagit, .32, .06, -.14);
-    koy(parca, .55, KAT.bodrum, 1.5, .35); etk(parca, 'sokulmus_karyola');
+    etk(kati(koy(parca, .55, KAT.bodrum, 1.5, .35)), 'sokulmus_karyola');
     kati(koy(P.raf(1.4, 1.7, .32, 3), .5, KAT.bodrum, 3.0, Math.PI / 2));
     kati(koy(P.koli(.5, .4, .42), 3.4, KAT.bodrum, 6.2, .5));
     kati(koy(P.koli(.44, .34, .36), 4.4, KAT.bodrum, 5.6, -.2));

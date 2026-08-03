@@ -27,6 +27,7 @@ const Durum = {
   toplamEsya: Object.keys(ESYALAR).length,
 
   esyaVar(id) { return !!this.envanter[id]; },
+  tarihler: [],
   anahtarVar(k) { return !!this.anahtar[k]; },
 
   /* Evrak kutusu açılınca annem yola çıkar */
@@ -67,6 +68,9 @@ const Durum = {
       this.envanter[id] = true;
       this.sayac++;
       this.defter.push({ id, ad: e.ad, oda: e.oda, katalog: e.katalog });
+      // Şifre ipuçları için: bu eşyanın taşıdığı tarih deftere düşer.
+      if (e.tarihNotu && !this.tarihler.some(t => t.id === id))
+        this.tarihler.push({ id, ad: e.ad, not: e.tarihNotu });
     }
     if (e.bayrak) this.bayrak[e.bayrak] = true;
     if (e.verir) {

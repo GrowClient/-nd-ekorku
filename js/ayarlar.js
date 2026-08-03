@@ -71,6 +71,7 @@ const Kayit = {
       s: 1,
       envanter: Durum.envanter, bayrak: Durum.bayrak, anahtar: Durum.anahtar,
       kilitAcildi: Durum.kilitAcildi, sayac: Durum.sayac, defter: Durum.defter,
+      tarihler: Durum.tarihler,
       mesajlar: Durum.mesajlar, olaylar: Durum.olaylar,
       ustKat: Durum.ustKat, tavanArasi: Durum.tavanArasi, bodrumda: Durum.bodrumda,
       pilZayif: Durum.pilZayif,
@@ -100,6 +101,7 @@ const Kayit = {
     Object.assign(Durum, {
       envanter: d.envanter || {}, bayrak: d.bayrak || {}, anahtar: d.anahtar || {},
       kilitAcildi: d.kilitAcildi || {}, sayac: d.sayac || 0, defter: d.defter || [],
+      tarihler: d.tarihler || [],
       mesajlar: d.mesajlar || {}, ustKat: !!d.ustKat, tavanArasi: !!d.tavanArasi,
       bodrumda: !!d.bodrumda, pilZayif: !!d.pilZayif,
       gerisayimOlaylari: d.gerisayimOlaylari || {},

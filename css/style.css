@@ -394,3 +394,45 @@ canvas{display:block;width:100%;height:100%}
 #son .ozet div{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:#7e7563}
 #son .ozet b{display:block;font-size:23px;letter-spacing:.06em;color:#c9bda2;
   margin-bottom:7px;text-transform:none;font-weight:normal}
+
+/* ───────────────────── VARLIK: YAKALANMA (jump scare) ───────────────── */
+#korku{
+  position:fixed;inset:0;z-index:80;display:none;
+  background:#000;overflow:hidden;pointer-events:none;
+}
+#korku.gor{display:block;animation:korkuSars .09s steps(2) infinite}
+#korku canvas{
+  position:absolute;left:50%;top:50%;
+  width:118%;height:118%;
+  transform:translate(-50%,-50%) scale(1);
+  transform-origin:center;
+  animation:korkuYaklas .55s cubic-bezier(.2,.9,.3,1) both;
+  image-rendering:auto;
+}
+@keyframes korkuYaklas{
+  0%  {transform:translate(-50%,-50%) scale(.55);opacity:.15;filter:brightness(.3)}
+  22% {opacity:1}
+  100%{transform:translate(-50%,-50%) scale(1.16);opacity:1;filter:brightness(1)}
+}
+@keyframes korkuSars{
+  0%  {transform:translate(0,0)}
+  25% {transform:translate(-13px,7px)}
+  50% {transform:translate(11px,-9px)}
+  75% {transform:translate(-7px,-12px)}
+  100%{transform:translate(9px,6px)}
+}
+
+/* ─────────────── KİLİT PANELİ: defterdeki tarihler ─────────────── */
+.tarihKutu{
+  margin-top:18px;padding:13px 15px;
+  border:1px solid #3a3428;border-left:3px solid #7d6a3c;
+  background:rgba(24,21,16,.55);border-radius:2px;
+  font-size:13px;line-height:1.55;color:#a89c86;
+}
+.tarihKutu.bos{color:#7d7364;font-style:italic}
+.tarihBaslik{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:#8a7c5c;margin-bottom:9px;
+}
+.tarihSatir{margin:7px 0}
+.tarihSatir b{display:block;color:#c9bb9c;font-weight:500;font-size:12px;margin-bottom:1px}
