@@ -69,15 +69,13 @@ const Arayuz = {
       this.el.giris.classList.add('gizli');
       Durum.basladi = true;
       if (devam && Kayit.geriYukle()) {
-        const c = document.querySelector('canvas');
-        if (c) c.requestPointerLock();
+        Oyuncu.imleciKilitle();
         this.fisilti('Kaldığım yerdeyim. Defter hâlâ elimde.');
         return;
       }
       Kayit.sil();
       Sinema.oynat(SAHNELER.acilis, () => {
-        const c = document.querySelector('canvas');
-        if (c) c.requestPointerLock();
+        Oyuncu.imleciKilitle();
         this.fisilti('Kapıyı arkamdan kapatıyorum. İçerisi dışarıdan soğuk.');
       });
     }, 1400);
@@ -111,8 +109,7 @@ const Arayuz = {
     this.kilitBekletme();
     this.el.menuPerde.classList.remove('gor');
     this.acikPanel = null;
-    const c = document.querySelector('canvas');
-    if (c && !Durum.bitti) c.requestPointerLock();
+    Oyuncu.imleciKilitle();
   },
 
   menuCiz() {
@@ -310,8 +307,7 @@ const Arayuz = {
     this.aktifEsya = null;
     this.defterDonus = false;
     if (defterdenGeldi) { this.defterCevir(); return; }
-    const c = document.querySelector('canvas');
-    if (c && !Durum.bitti) c.requestPointerLock();
+    Oyuncu.imleciKilitle();
     if (id && ESYALAR[id] && ESYALAR[id].final) setTimeout(() => this.finalAc(), 900);
   },
 
@@ -322,8 +318,7 @@ const Arayuz = {
       this.kilitBekletme();
       this.el.defterPerde.classList.remove('gor');
       this.acikPanel = null;
-      const c = document.querySelector('canvas');
-      if (c && !Durum.bitti) c.requestPointerLock();
+      Oyuncu.imleciKilitle();
       return;
     }
     this.defterCiz();
@@ -460,8 +455,7 @@ const Arayuz = {
     this.kilitBekletme();
     this.el.kilitPerde.classList.remove('gor');
     this.acikPanel = null;
-    const c = document.querySelector('canvas');
-    if (c && !Durum.bitti) c.requestPointerLock();
+    Oyuncu.imleciKilitle();
   },
 
   /* ══════════════════ GERİ SAYIM ══════════════════ */

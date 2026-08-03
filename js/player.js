@@ -49,15 +49,41 @@ const Oyuncu = {
     this.fenerHalka = halka;
 
     /* --- fare --- */
+    this.tuval = tuval;
     tuval.addEventListener('click', () => {
-      if (!this.kilitli && !Arayuz.acikPanel) tuval.requestPointerLock();
+      if (!this.kilitli && !Arayuz.acikPanel) this.imleciKilitle();
     });
     document.addEventListener('pointerlockchange', () => {
+      const oncekiDurum = this.kilitli;
       this.kilitli = document.pointerLockElement === tuval;
+      // Kilit yeni alındıysa tarayıcı ilk mousemove'da imlecin ekrandaki
+      // yerinden merkeze olan mesafeyi movementX olarak yollayabiliyor.
+      // Bu birkaç yüz piksel eder ve kamera bir anda savruluyor.
+      if (this.kilitli && !oncekiDurum) {
+        this.oturmaAni = performance.now() + 200;
+        this.atilanOlay = 0;
+        this.hareketOrt = 0;
+      }
       Arayuz.imlecDurumu(this.kilitli);
     });
     document.addEventListener('mousemove', e => {
       if (!this.kilitli) return;
+
+      // 1) kilitten hemen sonraki olayları yut
+      if (performance.now() < this.oturmaAni || this.atilanOlay < 2) {
+        this.atilanOlay++;
+        return;
+      }
+
+      const buyukluk = Math.abs(e.movementX) + Math.abs(e.movementY);
+
+      // 2) süreksiz sıçrama filtresi: gerçek bir fare hareketi kademelidir.
+      //    Sakin bir andan sonra gelen tek dev olay ışınlanmadır.
+      //    Eşik son hareketlerin ortalamasına göre, yani hızlı fare kırpılmaz.
+      const esik = Math.max(320, this.hareketOrt * 9);
+      if (buyukluk > esik) { this.hareketOrt = this.hareketOrt * .6 + buyukluk * .05; return; }
+      this.hareketOrt += (buyukluk - this.hareketOrt) * .25;
+
       this.yon.yaw -= e.movementX * this.duyarlilik;
       this.yon.pitch += (this.tersY ? 1 : -1) * e.movementY * this.duyarlilik;
       const s = Math.PI / 2 - .02;
@@ -75,6 +101,38 @@ const Oyuncu = {
 
     this.yerdeY = Ev.zeminYuksekligi(this.poz.x, this.poz.z, 0) ?? 0;
     this.poz.y = this.yerdeY;
+  },
+
+  /* İmleci kilitle. İki tuzak var:
+       · unadjustedMovement — işletim sisteminin fare ivmesini devre dışı
+         bırakır. Olmadan hızlı çevirişler orantısız büyüyor, kontrol
+         kaygan hissettiriyor.
+       · Tarayıcı, kilitten çıkıldıktan sonra ~1.25 sn boyunca yeni kilit
+         isteğini reddediyor. Panel kapanınca istek sessizce düşüyor,
+         oyuncu tıklayana kadar kamera cevapsız kalıyordu.            */
+  imleciKilitle(deneme = 0) {
+    const t = this.tuval;
+    if (!t || document.pointerLockElement === t || Durum.bitti) return;
+    let s;
+    try { s = t.requestPointerLock({ unadjustedMovement: true }); }
+    catch (e) { s = null; }
+    const tekrarDene = () => {
+      if (deneme >= 2) return;
+      clearTimeout(this._kilitZaman);
+      this._kilitZaman = setTimeout(() => this.imleciKilitle(deneme + 1), 1400);
+    };
+    if (s && typeof s.then === 'function') {
+      s.catch(() => {
+        // unadjustedMovement desteklenmiyor olabilir: sade istekle bir dene
+        try {
+          const s2 = t.requestPointerLock();
+          if (s2 && typeof s2.then === 'function') s2.catch(tekrarDene);
+        } catch (e) { tekrarDene(); }
+      });
+    } else if (s === undefined || s === null) {
+      // eski API: söz döndürmüyor, başarıyı pointerlockchange'den anlarız
+      setTimeout(() => { if (document.pointerLockElement !== t) tekrarDene(); }, 260);
+    }
   },
 
   /* Ayak altındaki yüzey — adım sesi buna göre değişir */
