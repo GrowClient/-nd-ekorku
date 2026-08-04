@@ -500,7 +500,9 @@ const Arayuz = {
     this.gerisayimGoster(false);
     document.exitPointerLock && document.exitPointerLock();
     Durum.sonSecim = id;
-    const sahne = SAHNELER['son_' + id];
+    // Finalin kendi planları + ortak "evden çıkış" kapanışı
+    const kendi = SAHNELER['son_' + id];
+    const sahne = kendi ? kendi.concat(SAHNELER.cikis) : null;
     if (sahne && !this._sonSahneOynadi) {
       this._sonSahneOynadi = true;
       this.el.son.classList.remove('gor');

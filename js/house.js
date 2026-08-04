@@ -78,10 +78,14 @@ const Ev = {
       if (o.trim === false) continue;
       const tabanda = Math.abs(p.y0 - y0) < .01;
       const tepede  = Math.abs(p.y1 - y1) < .01;
+      /* Yatay ve dikey duvarların şeritleri köşede üst üste biniyor ve
+         üst yüzeyleri tam aynı kotta olduğu için orada da z-fighting
+         çıkıyordu. Dikey duvarın şeridini 1.5 mm alçaltarak kırıyoruz —
+         gözle görülmez, çakışma kalmaz.                                */
       const seritKoy = (mal2, yMerkez, yuk, tasma) => {
         const s = new THREE.Mesh(G.kutu, mal2);
         s.scale.set(yatay ? l - .02 : kal + tasma, yuk, yatay ? kal + tasma : l - .02);
-        s.position.set(cx, yMerkez, cz);
+        s.position.set(cx, yMerkez - (yatay ? 0 : .0015), cz);
         s.castShadow = true; s.receiveShadow = true;
         Ev.sahne.add(s);
       };
@@ -131,10 +135,15 @@ const Ev = {
       g.castShadow = true; g.receiveShadow = true;
       Ev.sahne.add(g);
 
-      // basamak tahtası (üst yüzey, biraz taşkın)
+      /* Basamak tahtası. Gövdenin üst yüzü de yTop kotundaydı; iki yüzey
+         tam üst üste binince derinlik tamponu hangisinin önde olduğuna
+         karar veremiyor (z-fighting) ve kamera oynadıkça basamaklar
+         yanıp sönüyordu — gölge haritası da aynı yüzeyde titriyordu.
+         Tahtayı 4 mm yukarı alıp çakışmayı kırıyoruz.                 */
       const m = new THREE.Mesh(G.kutu, M.ahsapKoyu);
-      if (eksen === 'x') { m.scale.set(basamakBoy + .06, .06, gen + .02); m.position.set(x0 + (x1 - x0) * t, yTop - .03, (z0 + z1) / 2); }
-      else               { m.scale.set(gen + .02, .06, basamakBoy + .06); m.position.set((x0 + x1) / 2, yTop - .03, z0 + (z1 - z0) * t); }
+      const yTahta = yTop - .026;
+      if (eksen === 'x') { m.scale.set(basamakBoy + .06, .06, gen + .02); m.position.set(x0 + (x1 - x0) * t, yTahta, (z0 + z1) / 2); }
+      else               { m.scale.set(gen + .02, .06, basamakBoy + .06); m.position.set((x0 + x1) / 2, yTahta, z0 + (z1 - z0) * t); }
       m.castShadow = true; m.receiveShadow = true;
       Ev.sahne.add(m);
     }
@@ -490,6 +499,106 @@ const Ev = {
     kapi('anneanne', 9.5, 8.0, -Math.PI / 2, KAT.ust, { acilma: 1.62 });
     kapi('sandikodasi', 9.5, 1.6, -Math.PI / 2, KAT.ust, { kilitli: true, anahtar: 'key_tavan', acilma: 1.62 });
 
+    /* ---------------- EVİN DIŞI ----------------
+       Yalnızca kapanış ara sahnesinde ve pencerelerden görünür. Oyuncu
+       dışarı çıkamadığı için çarpışma yok, ayrıntı düşük tutuldu.
+       Ev x 0–15 / z 0–12 arasında; sokak kapısı güneyde (z=12).      */
+    (function disari() {
+      const yerRenk = new THREE.MeshStandardMaterial({ color: 0x3b3e33, roughness: 1 });
+      const yolRenk = new THREE.MeshStandardMaterial({ color: 0x56534a, roughness: .95 });
+
+      // bahçe zemini — evin cephesinden sokağa
+      const yer = new THREE.Mesh(new THREE.PlaneGeometry(46, 26), yerRenk);
+      yer.rotation.x = -Math.PI / 2;
+      yer.position.set(7.5, KAT.zemin - .62, 24);
+      yer.receiveShadow = true; sahne.add(yer);
+
+      /* Temel. Dış duvarlar y=0'da bitiyor, bahçe zemini -0.62'de:
+         aradaki boşluk yüzünden ev dışarıdan bakınca havada duruyordu. */
+      const temel = new THREE.Mesh(G.kutu, M.tas);
+      temel.scale.set(15.5, .78, 12.5);
+      temel.position.set(7.5, KAT.zemin - .37, 6.0);
+      temel.castShadow = true; temel.receiveShadow = true; sahne.add(temel);
+
+      // sahanlık ve üç basamak
+      const sah = new THREE.Mesh(G.kutu, M.tas);
+      sah.scale.set(2.6, .2, 1.5); sah.position.set(7.6, KAT.zemin - .10, 12.9);
+      sah.receiveShadow = true; sahne.add(sah);
+      for (let i = 0; i < 3; i++) {
+        const b = new THREE.Mesh(G.kutu, M.tas);
+        b.scale.set(2.2, .2, .38);
+        b.position.set(7.6, KAT.zemin - .20 - i * .17, 13.75 + i * .38);
+        b.receiveShadow = true; sahne.add(b);
+      }
+
+      // patika: kapıdan bahçe kapısına
+      const yol = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 11), yolRenk);
+      yol.rotation.x = -Math.PI / 2;
+      yol.position.set(7.6, KAT.zemin - .60, 20.4);
+      yol.receiveShadow = true; sahne.add(yol);
+
+      // bahçe duvarı ve demir kapı (ortada boşluk)
+      for (const [x0, x1] of [[-4, 6.4], [8.8, 19]]) {
+        const d = new THREE.Mesh(G.kutu, M.tas);
+        d.scale.set(x1 - x0, 1.05, .34);
+        d.position.set((x0 + x1) / 2, KAT.zemin - .10, 26);
+        d.castShadow = true; d.receiveShadow = true; sahne.add(d);
+      }
+      for (const x of [6.4, 8.8]) {
+        const s2 = new THREE.Mesh(G.kutu, M.tas);
+        s2.scale.set(.34, 1.9, .34);
+        s2.position.set(x, KAT.zemin + .33, 26);
+        s2.castShadow = true; sahne.add(s2);
+      }
+      for (let i = 0; i < 9; i++) {                      // kapı parmaklıkları
+        const c = new THREE.Mesh(G.kutu, M.metal);
+        c.scale.set(.045, 1.35, .045);
+        c.position.set(6.6 + i * .26, KAT.zemin + .06, 26);
+        sahne.add(c);
+      }
+
+      // çıplak ağaçlar — siluet olarak dursunlar diye ince ve koyu
+      const agacMal = new THREE.MeshStandardMaterial({ color: 0x201d18, roughness: 1 });
+      const agac = (x, z, olcek) => {
+        const g = new THREE.Group();
+        const govde = new THREE.Mesh(new THREE.CylinderGeometry(.10, .17, 4.2, 7), agacMal);
+        govde.position.y = 2.1; govde.castShadow = true; g.add(govde);
+        for (let i = 0; i < 7; i++) {
+          const a = i / 7 * Math.PI * 2 + x;
+          const dal = new THREE.Mesh(new THREE.CylinderGeometry(.025, .06, 1.9, 5), agacMal);
+          dal.position.set(Math.cos(a) * .55, 3.5 + (i % 3) * .35, Math.sin(a) * .55);
+          dal.rotation.set(Math.sin(a) * .8, 0, Math.cos(a) * .8);
+          dal.castShadow = true; g.add(dal);
+        }
+        g.position.set(x, KAT.zemin - .62, z);
+        g.scale.setScalar(olcek);
+        sahne.add(g);
+      };
+      agac(1.4, 17.5, 1.0); agac(13.6, 19.2, .85);
+      agac(-2.2, 23.0, 1.15); agac(17.8, 15.6, .95);
+
+      /* Dış mekân ay ışığı. Normalde 0: iç mekân aydınlanması buna göre
+         ayarlı, açık bırakılırsa pencerelerden içeri sızıp evi
+         aydınlatıyor. Çıkış ara sahnesinde Sinema açıyor.            */
+      const ay2 = new THREE.DirectionalLight(0x9fb4d8, 0);
+      ay2.position.set(-18, 26, 46);
+      ay2.target.position.set(7.5, 0, 20);
+      sahne.add(ay2); sahne.add(ay2.target);
+      const dolgu = new THREE.HemisphereLight(0x27354f, 0x141611, 0);
+      sahne.add(dolgu);
+      Ev.dinamik.disIsik = { ay: ay2, dolgu };
+
+      // sokak lambası: uzakta tek bir soluk kaynak
+      const direk = new THREE.Mesh(new THREE.CylinderGeometry(.07, .09, 4.4, 6), agacMal);
+      direk.position.set(16.2, KAT.zemin + 1.58, 28.0); sahne.add(direk);   // kapanış kadrajını kesmesin
+      const lamba = new THREE.PointLight(0xffd9a0, 9, 22, 1.4);
+      lamba.position.set(16.2, KAT.zemin + 3.7, 28.0);
+      sahne.add(lamba);
+      const kufe = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8),
+        new THREE.MeshBasicMaterial({ color: 0xffe3b4 }));
+      kufe.position.copy(lamba.position); sahne.add(kufe);
+    })();
+
     /* ---------------- IŞIKLAR ---------------- */
     function ampulIsigi(x, y, z, renk, guc, mesafe) {
       const l = new THREE.PointLight(renk, guc, mesafe, 1.35);
@@ -715,7 +824,11 @@ const Ev = {
     const muc = new THREE.Group();
     kutu(muc, .28, .13, .19, M.ahsapKoyu, 0, .065, 0);
     kutu(muc, .22, .018, .14, M.pirinc, 0, .135, 0);
-    koy(muc, 13.7, KAT.ust + .76, 6.3); etk(muc, 'mucevher');
+    // Masa arkaya (dünya +Z) bakacak şekilde döndürülmüş; ayna yerel
+    // z = -.18'de, yani dünya z = 6.28'de. Kutu 6.3'teydi: aynanın
+    // içine giriyordu. Ayrıca tezgâh yüzeyi KAT.ust+.74 iken kutu
+    // .76'ya konmuş, 4 cm gömülüydü. İkisi de düzeltildi.
+    koy(muc, 13.7, KAT.ust + .74, 5.98); etk(muc, 'mucevher');
 
     kati(koy(P.komodin(), 12.7, KAT.ust, 11.2));
     const deste = new THREE.Group();
@@ -776,7 +889,9 @@ const Ev = {
       kutu(parca, .06, 1.05, .5, M.ahsapKoyu, i * .09, .55, 0, .07 + i * .03);
     kutu(parca, .34, .05, .5, M.ahsapKoyu, .15, .04, .1, .3);
     kutu(parca, .12, .1, .09, M.kagit, .32, .06, -.14);
-    etk(kati(koy(parca, .55, KAT.bodrum, 1.5, .35)), 'sokulmus_karyola');
+    // Merdivenin ayak ucundaydı (basamaklar x 0.6–3.4 / z 0.2–1.6),
+    // inerken önünü kesiyordu. Bir metre güneye alındı.
+    etk(kati(koy(parca, 1.0, KAT.bodrum, 2.6, .35)), 'sokulmus_karyola');
     kati(koy(P.raf(1.4, 1.7, .32, 3), .5, KAT.bodrum, 3.0, Math.PI / 2));
     kati(koy(P.koli(.5, .4, .42), 3.4, KAT.bodrum, 6.2, .5));
     kati(koy(P.koli(.44, .34, .36), 4.4, KAT.bodrum, 5.6, -.2));

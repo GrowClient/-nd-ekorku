@@ -545,17 +545,22 @@ const TEMPO = {
   ayna:        { kisa:'Bardakta iki diş fırçası. Çocuğunkinin kılları hiç kullanılmamış gibi dimdik.' },
   mucevher:    { kisa:'Yağlı kâğıtta bir tutam açık kahve çocuk saçı: 11.01.1999. Altında pirinç bir anahtar.' },
 
-  /* Tam ekran açanlar — hikâyenin omurgası */
-  fotograf:      { panel:true, tut:[0,1,2] },
+  /* Tam ekran açanlar — YALNIZCA hikâyenin omurgası.
+     Önce on bir eşya oyunu durdurup tam ekran metin açıyordu; çok fazla
+     okuma oluyordu. Dördü tek satırlık fısıltıya indirildi, kalanlarda
+     da gösterilen paragraf sayısı kısıldı. Tam metinler kaybolmuyor:
+     defterden (Tab) satıra tıklayınca hepsi okunabiliyor.             */
+  fotograf:      { kisa:'Çerçevedeki fotoğraf sararmış. Üç kişi var; ortadaki yüz kazınmış — tırnakla, sonradan.' },
+  mektuplar_iade:{ kisa:'Kırk zarf, hiçbiri açılmamış. Damgalar postanenin değil: annemin el yazısı. İADE.' },
+  mont:          { kisa:'Askıda çocuk montu. Etiketinde benim adım yok; sökülmüş bir etiketin izi var.' },
+  pamuk:         { kisa:'Yatağın pamuğu bir yerden yırtılıp tekrar dikilmiş. Dikiş içeriden atılmış.' },
+
   cizelge:       { panel:true, tut:[0,1,3] },
-  pamuk:         { panel:true, tut:[0,1,2] },
-  duvar_kagidi:  { panel:true, tut:[1,2,4,5] },
-  mektuplar_iade:{ panel:true, tut:[0,1,3] },
-  mont:          { panel:true, tut:[0,1,2] },
-  album:         { panel:true, tut:[1,2,3,4] },
+  duvar_kagidi:  { panel:true, tut:[1,2,5] },
+  album:         { panel:true, tut:[1,2,4] },
   gazete:        { panel:true, tut:[0,1,3] },
-  evraklar:      { panel:true, tut:[1,2,4,5], verir:null },
-  sandik:        { panel:true, tut:[0,1,2,5] },
+  evraklar:      { panel:true, tut:[1,2,5], verir:null },
+  sandik:        { panel:true, tut:[0,1,5] },
   sarnic:        { panel:true, tut:[1,2,3] },
 };
 for (const id in TEMPO) Object.assign(ESYALAR[id], TEMPO[id]);
@@ -683,6 +688,44 @@ const SAHNELER = {
     { baslangic: [7.5, 4.82, 5.0], bitis: [7.5, 4.82, 3.2],
       bak: [9.40, 4.90, 3.05], sure: 7.0, fener: 3.5, ton: 'kirilgan',
       yazi: 'Bazen gece uyanıyorum ve adımı hatırlamak için birkaç saniye düşünmem gerekiyor. Sonra hatırlıyorum. Sonra tekrar uyuyorum.' },
+  ],
+
+  /* Ortak kapanış: hangi final olursa olsun evden çıkışı gösteriyor.
+     Hikâyenin son cümlesi bir metin kutusunda değil, evin kendisinde
+     kalsın diye — kapıdan çıkış, patika, ve arkaya son bir bakış.   */
+  cikis: [
+    { baslangic: [7.6, 1.66, 10.4], bitis: [7.6, 1.62, 12.9],
+      bak: [7.60, 1.40, 13.8], bakBitis: [7.60, 1.05, 15.4], sure: 6.5, fener: 2.2,
+      ton: 'kirilgan', dis: true,
+      // sokak kapısı oyun boyunca kapalı; kapanışta açılıyor
+      baslarken: () => {
+        const k = Ev.kapilar.on;
+        if (k && !k.acik) {
+          k.sabit = false;
+          Ev.kapiAc('on');
+          k.grup.rotation.y = k.hedefAci;
+          k.hedefAci = undefined;
+        }
+      },
+      yazi: 'Kapıyı açık bıraktım. Otuz üç yıl kapalı kalmıştı; bir gece de açık kalsın.' },
+    { baslangic: [7.6, 1.30, 14.6], bitis: [7.6, 1.30, 21.5],
+      bak: [7.60, 1.20, 24.0], bakBitis: [8.40, 1.30, 26.5], sure: 7.5, fener: 1.4,
+      ton: 'soguk', dis: true,
+      yazi: 'Patikadaki taşları sayarak yürüdüm. On dört. Altı yaşındayken de on dörttü.' },
+    { baslangic: [8.0, 1.34, 27.2], bitis: [9.6, 1.36, 29.4],
+      bak: [7.80, 3.40, 12.0], bakBitis: [8.40, 4.60, 12.0], sure: 8.0, fener: 0,
+      ton: 'kirilgan', dis: true,
+      // pencerenin ardında duran figür: kameraya dönük ve açık tonlu,
+      // yoksa gece camın ardından hiç seçilmiyor
+      // Pencere eşiği KAT.ust+1.0'da, çocuk 1.32 m: yerde dururken
+      // yalnızca saçının ucu görünüyordu. Bir şeyin üstüne çıkmış gibi
+      // 42 cm yükseltildi — baş ve göğüs kadraja giriyor.
+      baslarken: () => Sinema.siluet(11.6, KAT.ust + .42, 11.72, 1.0, 0, true),
+      yazi: 'Arabaya binmeden önce bir kez döndüm. Üst kattaki pencerede biri duruyordu. Elimi kaldırdım.' },
+    { baslangic: [9.6, 1.36, 29.4], bitis: [10.4, 1.36, 31.0],
+      bak: [8.40, 4.60, 12.0], bakBitis: [8.20, 2.20, 12.0], sure: 7.0, fener: 0,
+      ton: 'kirilgan', dis: true,
+      yazi: 'O da kaldırdı. Sonra pencerede kimse kalmadı.' },
   ],
 
   son_yetisemedin: [

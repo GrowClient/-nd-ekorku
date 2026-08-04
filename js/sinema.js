@@ -47,6 +47,7 @@ const Sinema = {
       this.yaziEl.textContent = p.yazi || '';
       if (p.yazi) this.yaziEl.classList.add('gor');
     }, 420);
+    this.disari(!!p.dis);
     if (p.baslarken) p.baslarken();
     // Ara sahneler artık varsayılan olarak seslendirilir. Bu Deniz'in
     // iç sesi: kırılgan ton. Plan kendi tonunu belirtebilir.
@@ -62,6 +63,7 @@ const Sinema = {
   },
 
   temizle() {
+    this.disari(false);
     this.aktif = false;
     Durum.sinema = false;
     this.el.classList.remove('gor');
@@ -73,17 +75,33 @@ const Sinema = {
   },
 
   /* karanlıkta duran bir insan silueti (varlık gövdesinden türetilir) */
-  siluet(x, y, z, olcek = 1, bakYaw = 0) {
+  /* parlak=true: karartma yapılmaz. Uzaktan, camın ardından bakılan
+     figürler koyu tutulunca hiç seçilmiyor.                        */
+  siluet(x, y, z, olcek = 1, bakYaw = 0, parlak = false) {
     const g = Varlik.mesh.clone(true);
-    // Gövde artık dokulu bir düzlem: malzemeyi tamamen değiştirirsek
-    // silüet dolu bir dikdörtgene dönüşür. Onun yerine kopyalayıp
-    // karartıyoruz; alfa kesimi (alphaTest) böylece korunuyor.
+    // Gövde dokulu bir düzlem: malzemeyi tamamen değiştirirsek silüet
+    // dolu bir dikdörtgene döner. Kopyalayıp yalnızca tonunu değiştiriyoruz;
+    // alfa kesimi (alphaTest) böylece korunuyor.
     g.traverse(o => {
       if (!o.isMesh) return;
-      const m = o.material.clone();
-      m.color = new THREE.Color(0x2a2b33);
-      m.emissive = new THREE.Color(0x05050a);
-      m.opacity = .97;
+      let m;
+      if (parlak) {
+        /* Camın ardında, iç mekân ışığı almayan bir figür. Işığa bağlı
+           bir malzemeyle görünmesi imkânsız — yayım haritası da dokuyla
+           çarpıldığı için yetmiyor. Bu yüzden ışıktan tamamen bağımsız
+           bir malzeme: dokunun kendi parlaklığı neyse o kadar görünür. */
+        m = new THREE.MeshBasicMaterial({
+          map: o.material.map,
+          color: 0xcac3b5,       // camın ardından seçilebilecek kadar açık
+          transparent: true, opacity: .96,
+          alphaTest: .34, side: THREE.DoubleSide,
+        });
+      } else {
+        m = o.material.clone();
+        m.color = new THREE.Color(0x2a2b33);
+        m.emissive = new THREE.Color(0x05050a);
+        m.opacity = .97;
+      }
       o.material = m;
     });
     g.scale.setScalar(olcek);
@@ -93,6 +111,38 @@ const Sinema = {
     this.sahne.add(g);
     this.siluetler.push(g);
     return g;
+  },
+
+  /* Dış mekân kipi: sahne sisi iç mekâna göre ayarlı (yoğunluk .085),
+     dışarıda 20 metrede her şey kayboluyor. Çıkış planları için sisi
+     seyreltip ay ışığını açıyoruz; sahne bitince geri alınıyor.     */
+  disari(acik) {
+    const s = this.sahne;
+    if (!s) return;
+    if (acik) {
+      if (this._sisYedek === undefined) {
+        this._sisYedek = s.fog.density;
+        this._sisRenk = s.fog.color.getHex();
+        this._gokYedek = s.background.getHex();
+      }
+      // gece göğü tam siyah değil: evin silueti ayrışsın diye biraz açık
+      s.fog.density = .0092;
+      s.fog.color.setHex(0x0d1526);
+      s.background.setHex(0x0d1526);
+      if (Ev.dinamik.disIsik) {
+        Ev.dinamik.disIsik.ay.intensity = 3.4;
+        Ev.dinamik.disIsik.dolgu.intensity = 1.15;
+      }
+    } else if (this._sisYedek !== undefined) {
+      s.fog.density = this._sisYedek;
+      s.fog.color.setHex(this._sisRenk);
+      s.background.setHex(this._gokYedek);
+      this._sisYedek = undefined;
+      if (Ev.dinamik.disIsik) {
+        Ev.dinamik.disIsik.ay.intensity = 0;
+        Ev.dinamik.disIsik.dolgu.intensity = 0;
+      }
+    }
   },
 
   guncelle(dt) {
