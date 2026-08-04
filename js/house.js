@@ -667,6 +667,7 @@ const Ev = {
     tahta.receiveShadow = true; S.add(tahta);
     etk(tahta, 'gizli_bolme');
     Ev.dinamik.gizliTahta = tahta;
+    Ev.dinamik.gizliTahtaTaban = KAT.ust + .028;    // koşul sağlanınca kalkacak
     kati(koy(P.gardirop(1.3, 2.0, .58), 4.65, KAT.ust, 6.8, -Math.PI / 2));
     const kutuAyi = new THREE.Group();
     kutu(kutuAyi, .44, .2, .32, M.karton, 0, .1, 0);

@@ -797,7 +797,7 @@ Object.assign(ESYALAR, {
   gizli_bolme: {
     ad: 'Gevşek Döşeme Tahtası',
     oda: 'Çocuk Odası',
-    katalog: 'Karyolanın altında, döşemede oynayan bir tahta. Ucundaki çivi bir kere sökülmüş ve bir daha çakılmamış.',
+    katalog: 'Karyolanın yanında, döşemede oynayan bir tahta. Ucundaki çivi bir kere sökülmüş ve bir daha çakılmamış.',
     gizli: ['f_duvar', 'f_pamuk'],
     beats: [
       { t:'gozlem', s:'Tahtayı kaldırıyorum. Altında teneke bir bisküvi kutusu var. Kapağı pas yapmış ama kolayca açılıyor — çok açılmış.' },
@@ -816,6 +816,11 @@ FINAL.gizliEk = 'Bisküvi kutusunu yanıma aldım. İçindekiler bir çocuğun b
 
 /* ── Hedef göstergesi: oyuncu ne yapacağını bilsin ─────────────────────── */
 const HEDEFLER = [
+  /* Gizli bölme listenin başında: yalnızca iki eşya incelendikten sonra
+     ve bulunana kadar etkin — dar bir pencere. Sona koyunca ana yol
+     bitmeden hiç görünmüyordu, yani kimse bulamıyordu. */
+  { kosul: d => d.bayrak.f_duvar && d.bayrak.f_pamuk && !d.esyaVar('gizli_bolme'),
+    metin: 'Çocuk odasında, karyolanın yanındaki gevşek döşeme tahtasını kaldır.' },
   { kosul: d => !d.anahtarVar('key_kiler'),
     metin: 'Anneannenin oturma odasına bak — kilerin anahtarı orada bir yerde.' },
   { kosul: d => !d.ustKat,

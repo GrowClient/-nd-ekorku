@@ -171,6 +171,24 @@ const Durum = {
       setTimeout(() => Varlik.etkinlestir(), 6500);
     }
 
+    /* Gizli bölme: koşulu sağlanınca tahta bir ucundan KALKAR.
+       Önceden hiçbir işareti yoktu — koyu bir döşeme tahtası, koyu bir
+       döşemenin üstünde, karanlık bir odada. Şartlar tutmadan zaten
+       etkileşime de girmiyor, yani oyuncu için hiç var olmuyordu. */
+    if (this.bayrak.f_duvar && this.bayrak.f_pamuk && !O.tahta) {
+      O.tahta = true;
+      const t = Ev.dinamik.gizliTahta;
+      if (t) {
+        t.rotation.x = -.17;                                  // güney ucu kalkık
+        t.position.y = Ev.dinamik.gizliTahtaTaban + .038;
+      }
+      if (!this.esyaVar('gizli_bolme')) setTimeout(() => {
+        Ses.gicirti(.65);
+        Arayuz.fisilti('Çocuk odasında karyolanın yanındaki tahtalardan biri oynuyor. ' +
+                       'Ucundaki çivi yerinde değil.');
+      }, 2600);
+    }
+
     // Evraklar: annem yola çıktı + iki tarih zihinde birleşir
     if (this.bayrak.f_evrak && !O.yolda) {
       O.yolda = true;
